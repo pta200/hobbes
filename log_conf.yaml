@@ -1,0 +1,30 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  default:
+    # "()": uvicorn.logging.DefaultFormatter
+    format: "[%(asctime)s] - %(levelname)s - %(name)s - %(message)s"
+    datefmt: "%Y-%m-%dT%H:%M:%S%z"
+handlers:
+  default:
+    formatter: default
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
+  access:
+    formatter: default
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
+loggers:
+  uvicorn.error:
+    handlers:
+      - default
+    propagate: no
+  uvicorn.access:
+    handlers:
+      - access
+    propagate: no
+root:
+  level: DEBUG
+  handlers:
+    - default
+  propagate: no
