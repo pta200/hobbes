@@ -19,3 +19,34 @@ services:
       - 5432
     env_file:
       - development.env
+
+   worker:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: ["worker", "-E -Ofair --loglevel=debug --autoscale=10,3 --max-tasks-per-child=5"]  
+    container_name: worker
+    env_file:
+      - development.env
+    depends_on:
+      - service
+      - redis
+
+  dashboard:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: ["dashboard"]
+    container_name: dashboard
+    ports:
+      - 5555:5555
+    env_file:
+      - development.env
+    depends_on:
+      - service
+      - redis
+      - worker
+
+  redis:
+    image: redis:7
+    container_name: redis
