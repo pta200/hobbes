@@ -1,11 +1,12 @@
 import logging
 from datetime import datetime
-
+from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 from hobbes.crud import all_stats, date_filter_stats, filter_stats, insert_stat
 from hobbes.db_manager import get_session
 from hobbes.models import BookFilter, BookPayload
 from sqlmodel.ext.asyncio.session import AsyncSession
+from hobbes.work import replay_task
 
 logger = logging.getLogger(__name__)
 
@@ -92,3 +93,43 @@ async def search_books(
         List[Book]: list of Book objects
     """
     return await filter_stats(filter.model_dump(exclude_none=True), session)
+
+
+@celery_router.get("/tasks/status/{task_id}")
+async def get_status(task_id) -> TaskResponse:
+    """retrieve task status from result backend using task UUID
+
+    Args:
+        task_id (str): task uuid string
+
+    Returns:
+        TaskResponse:  model containing task id, status and result strings.
+        AsyncResult.state returns PENDING in case of unknown task ids.
+        https://docs.celeryq.dev/en/latest/userguide/tasks.html#pending
+    """
+    task = AsyncResult(task_id)
+    if task.result:
+        result = str(task.result)
+    else:
+        result = None
+    return TaskResponse(task_id=task.id, task_status=task.status, task_result=result)
+
+
+@celery_router.put("/tasks/retry/{task_id}")
+async def replay_web_task(task_id) -> TaskResponse:
+    """_summary_
+
+    Args:
+        task_id (str): task uuid string
+
+    Returns:
+        TaskResponse: model containing task id, status and result strings
+    """
+    task = replay_task(task_id)
+    if task:
+        return TaskResponse(task_id=task.id, task_status=task.status, task_result=task.result)
+    raise HTTPException(
+        status_code=404,
+        detail=f"unable to retry task id {task_id} as either the results have expired or the id is invalid",
+    )
+
