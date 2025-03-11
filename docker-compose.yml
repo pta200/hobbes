@@ -1,5 +1,20 @@
 services:
 
+reverse-proxy:
+    image: dockerregistry.methodstudios.com/traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      # - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   service:
     build:
       context: ./
@@ -9,6 +24,9 @@ services:
       - 8000:8000
     env_file:
       - development.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastapi.rule=PathPrefix(`/docs`, `/v1`, `/openapi.json`)"
     depends_on:
       - db
 
@@ -42,6 +60,9 @@ services:
       - 5555:5555
     env_file:
       - development.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=PathPrefix(`/`)"
     depends_on:
       - service
       - redis
