@@ -3,6 +3,7 @@ import logging
 import os
 
 from celery import Celery
+from hobbes.models import Book
 
 logger = logging.getLogger(__name__)
 
@@ -50,51 +51,13 @@ def payload_sanitizer(*Args, **Kwargs):
 
 
 @celery_app.task(name="inventory_books", bind=True, max_retries=MAX_RETRIES, retry_backoff=True)
-@payload_sanitizer(BookInventory)
-def create_show_task(self, payload: BookInventory):
+@payload_sanitizer(Book)
+def archive_book(self, payload: Book):
     try:
         return True
-    except CreateShowEventHandlerException as error:
+    except Exception as error:
         logger.exception(error)
         if self.request.retries >= self.max_retries:
             logger.error("failed all retries")
         raise self.retry(exc=error, countdown=COUNTDOWN)
 
-
-@celery_router.get("/tasks/status/{task_id}")
-async def get_status(task_id) -> TaskResponse:
-    """retrieve task status from result backend using task UUID
-
-    Args:
-        task_id (str): task uuid string
-
-    Returns:
-        TaskResponse:  model containing task id, status and result strings.
-        AsyncResult.state returns PENDING in case of unknown task ids.
-        https://docs.celeryq.dev/en/latest/userguide/tasks.html#pending
-    """
-    task = AsyncResult(task_id)
-    if task.result:
-        result = str(task.result)
-    else:
-        result = None
-    return TaskResponse(task_id=task.id, task_status=task.status, task_result=result)
-
-
-@celery_router.put("/tasks/retry/{task_id}")
-async def replay_web_task(task_id) -> TaskResponse:
-    """_summary_
-
-    Args:
-        task_id (str): task uuid string
-
-    Returns:
-        TaskResponse: model containing task id, status and result strings
-    """
-    task = replay_task(task_id)
-    if task:
-        return TaskResponse(task_id=task.id, task_status=task.status, task_result=task.result)
-    raise HTTPException(
-        status_code=404,
-        detail=f"unable to retry task id {task_id} as either the results have expired or the id is invalid",
-    )

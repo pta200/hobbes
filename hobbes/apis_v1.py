@@ -4,7 +4,7 @@ from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 from hobbes.crud import all_stats, date_filter_stats, filter_stats, insert_stat
 from hobbes.db_manager import get_session
-from hobbes.models import BookFilter, BookPayload
+from hobbes.models import BookFilter, BookPayload, TaskResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 from hobbes.work import replay_task
 
@@ -95,7 +95,7 @@ async def search_books(
     return await filter_stats(filter.model_dump(exclude_none=True), session)
 
 
-@celery_router.get("/tasks/status/{task_id}")
+@stat_router.get("/tasks/status/{task_id}")
 async def get_status(task_id) -> TaskResponse:
     """retrieve task status from result backend using task UUID
 
@@ -115,7 +115,7 @@ async def get_status(task_id) -> TaskResponse:
     return TaskResponse(task_id=task.id, task_status=task.status, task_result=result)
 
 
-@celery_router.put("/tasks/retry/{task_id}")
+@stat_router.put("/tasks/retry/{task_id}")
 async def replay_web_task(task_id) -> TaskResponse:
     """_summary_
 

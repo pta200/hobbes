@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
-
+from pydantic import BaseModel
 from sqlmodel import Column, DateTime, Field, SQLModel
 
 
@@ -33,3 +33,8 @@ class BookFilter(SQLModel):
     genre: Optional[str] = None
     condition: Optional[str] = None
     create_datetimestamp: Optional[str] = None
+
+class TaskResponse(BaseModel):
+    task_id: str
+    task_status: str
+    task_result: str
