@@ -8,10 +8,10 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update \
-    # && apt-get -y install gcc postgresql vim\
-    && apt-get -y install vim\
-    && apt-get clean
+# RUN apt-get update \
+#    # && apt-get -y install gcc postgresql vim\
+#    && apt-get -y install vim\
+#    && apt-get clean
 
 # copy files and install python dependencies
 COPY . .

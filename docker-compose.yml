@@ -1,6 +1,6 @@
 services:
 
-reverse-proxy:
+  reverse-proxy:
     image: traefik:v3
     container_name: traefik
     command:
@@ -20,6 +20,7 @@ reverse-proxy:
       context: ./
       dockerfile: Dockerfile
     container_name: service
+    command: ["service"]
     ports:
       - 8000:8000
     env_file:
@@ -38,7 +39,7 @@ reverse-proxy:
     env_file:
       - development.env
 
-   worker:
+  worker:
     build:
       context: ./
       dockerfile: Dockerfile
