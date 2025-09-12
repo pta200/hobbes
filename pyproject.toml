@@ -3,7 +3,7 @@ name = "hobbes"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Paolo Audiberti",email = "paolo.audiberti@methodstudios.com"}
+    {name = "Paolo Audiberti",email = "pta200@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
