@@ -19,6 +19,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+    image: hobbes:latest
     container_name: service
     command: ["service"]
     ports:
@@ -40,9 +41,7 @@ services:
       - development.env
 
   worker:
-    build:
-      context: ./
-      dockerfile: Dockerfile
+    image: hobbes:latest
     command: ["worker", "-E -Ofair --loglevel=debug --autoscale=10,3 --max-tasks-per-child=5"]  
     container_name: worker
     env_file:
@@ -52,9 +51,7 @@ services:
       - redis
 
   dashboard:
-    build:
-      context: ./
-      dockerfile: Dockerfile
+    image: hobbes:latest
     command: ["dashboard"]
     container_name: dashboard
     ports:
