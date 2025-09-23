@@ -4,9 +4,9 @@ from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 from hobbes.crud import all_stats, date_filter_stats, filter_stats, insert_stat
 from hobbes.db_manager import get_session
-from hobbes.models import BookFilter, BookPayload, TaskResponse
+from hobbes.models import BookFilter, BookPayload, TaskResponse, Book
 from sqlmodel.ext.asyncio.session import AsyncSession
-from hobbes.work import replay_task
+from hobbes.tasks import replay_task, inventory_books
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,21 @@ stat_router = APIRouter(
     tags=["Book Inventory"],
     responses={404: {"description": "Not found"}},
 )
+
+@stat_router.post("/archive_book", status_code=201)
+async def archive(payload: BookPayload) -> TaskResponse:
+    """archive
+
+    Args:
+        payload (BookPayload): book json payload
+
+    Returns:
+        TaskResponse: task info
+    """
+    logger.debug("payload is %s", payload)
+
+    task = inventory_books.delay(payload.model_dump())
+    return TaskResponse(task_id=task.id,task_status=task.status,task_result=task.state)
 
 
 @stat_router.post("/book", status_code=201)
