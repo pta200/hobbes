@@ -13,7 +13,7 @@ from sqlmodel import SQLModel
 logger = logging.getLogger(__name__)
 
 
-class DatabaseSessionManager:
+class DatabaseAsyncSessionManager:
     """Database engine and session managment class"""
 
     def __init__(self):
@@ -61,10 +61,10 @@ class DatabaseSessionManager:
         await self._async_session.remove()
 
 
-sessionmanager = DatabaseSessionManager()
+async_session_manager = DatabaseAsyncSessionManager()
 
 
-async def get_session():
+async def get_async_session():
     """create async session used with FastAPI Dependency injection
 
     other way to handle it:
@@ -81,7 +81,7 @@ async def get_session():
     """
 
     # get scoped session
-    session = await sessionmanager.get_async_session()
+    session = await async_session_manager.get_async_session()
     try:
         yield session
     except Exception as error:
@@ -90,4 +90,4 @@ async def get_session():
         raise
     finally:
         # remove session when task is complete
-        await sessionmanager.remove_session()
+        await async_session_manager.remove_session()

@@ -3,7 +3,7 @@ from datetime import datetime
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 from hobbes.crud import all_stats, date_filter_stats, filter_stats, insert_stat
-from hobbes.db_manager import get_session
+from hobbes.db_manager import get_async_session
 from hobbes.models import BookFilter, BookPayload, TaskResponse, Book
 from sqlmodel.ext.asyncio.session import AsyncSession
 from hobbes.tasks import replay_task, inventory_books
@@ -34,14 +34,14 @@ async def archive(payload: BookPayload) -> TaskResponse:
 
 @stat_router.post("/book", status_code=201)
 async def insert_book(
-    payload: BookPayload, session: AsyncSession = Depends(get_session)
+    payload: BookPayload, session: AsyncSession = Depends(get_async_session)
 ):
     """endpoint to insert a book. Hands it off to a background task so the API can return immediately
 
     Args:
         payload (BookPayload): book json payload
         background_tasks (BackgroundTasks):
-        session (AsyncSession, optional): _description_. Defaults to Depends(get_session).
+        session (AsyncSession, optional): _description_. Defaults to Depends(get_async_session).
 
     Returns:
         json: status ok
@@ -52,11 +52,11 @@ async def insert_book(
 
 
 @stat_router.get("/all")
-async def get_all_books(session: AsyncSession = Depends(get_session)):
+async def get_all_books(session: AsyncSession = Depends(get_async_session)):
     """get all Books
 
     Args:
-        session (AsyncSession, optional): _description_. Defaults to Depends(get_session).
+        session (AsyncSession, optional): _description_. Defaults to Depends(get_async_session).
 
     Returns:
         List[Book]: list of Book objects
@@ -66,14 +66,14 @@ async def get_all_books(session: AsyncSession = Depends(get_session)):
 
 @stat_router.get("/getbydate")
 async def get_books_by_date(
-    date_param: datetime, compare: str, session: AsyncSession = Depends(get_session)
+    date_param: datetime, compare: str, session: AsyncSession = Depends(get_async_session)
 ):
     """query Books by date filter.
 
     Args:
         date_param (datetime): format %Y-%m-%dT%H:%M:%SZ
         compare (str): gt or lt
-        session (AsyncSession, optional): Dependency injection calling db_manager get_session
+        session (AsyncSession, optional): Dependency injection calling db_manager get_async_session
 
     Returns:
         List[Book]: list of Book objects
@@ -83,7 +83,7 @@ async def get_books_by_date(
 
 @stat_router.post("/search")
 async def search_books(
-    filter: BookFilter, session: AsyncSession = Depends(get_session)
+    filter: BookFilter, session: AsyncSession = Depends(get_async_session)
 ):
     """search Books by dynamic filter
 
@@ -102,7 +102,7 @@ async def search_books(
 
     Args:
         filter (BookFilter): book filter model
-        session (AsyncSession, optional): Dependency injection calling db_manager get_session
+        session (AsyncSession, optional): Dependency injection calling db_manager get_async_session
 
     Returns:
         List[Book]: list of Book objects

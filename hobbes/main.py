@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from hobbes.apis_v1 import stat_router
-from hobbes.db_manager import sessionmanager
+from hobbes.db_manager import async_session_manager
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +21,10 @@ async def lifespan(app: FastAPI):
     Args:
         app (FastAPI): FastAPI app
     """
-    sessionmanager.init(DATABASE_URL)
-    await sessionmanager.init_db()
+    async_session_manager.init(DATABASE_URL)
+    await async_session_manager.init_db()
     yield
-    await sessionmanager.close()
+    await async_session_manager.close()
 
 
 # get project version from pyproject.toml
