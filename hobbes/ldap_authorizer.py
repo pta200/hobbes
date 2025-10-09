@@ -18,7 +18,7 @@ from flower.views import BaseHandler
 
 logger = logging.getLogger(__name__)
 
-DOMAIN = os.getenv("AUTH_DOMAIN", "")
+auth_domain = os.getenv("AUTH_DOMAIN", "")
 ldap_uri = os.getenv("LDAP_SERVER_URI", "")
 
 class LDAPHandler(BaseHandler):
@@ -75,7 +75,7 @@ class LDAPHandler(BaseHandler):
             self.render('login.html', message="missing credentials")
 
         else:
-            username = f"{self.get_argument('username')}@{DOMAIN}"
+            username = f"{self.get_argument('username')}@{auth_domain}"
             if self._authenticate(username, self.get_argument('password')):
                 self.set_secure_cookie("user", username)
                 next_ = self.get_argument('next', self.application.options.url_prefix or '/')
