@@ -42,7 +42,7 @@ services:
 
   worker:
     image: hobbes:latest
-    command: ["worker", "-E -Ofair --loglevel=debug --autoscale=10,3 --max-tasks-per-child=5"]  
+    command:  ["worker", "-E -Ofair --loglevel=debug --pool=gevent --concurrency=100"]
     container_name: worker
     env_file:
       - development.env

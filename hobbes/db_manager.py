@@ -22,7 +22,7 @@ class DatabaseAsyncSessionManager:
 
     def init(self, database_url):
         self._engine = create_async_engine(
-            database_url, echo=False, future=True, pool_size=20, max_overflow=10
+            database_url, echo=False, future=True, pool_size=5, max_overflow=10
         )
         self._async_session = async_scoped_session(
             async_sessionmaker(

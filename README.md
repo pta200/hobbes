@@ -1,11 +1,14 @@
 # Hobbes
 
-The Hobbes is a lab FastAPI RESTFull service
+The Hobbes is a lab FastAPI RESTFull service with Celery for long running background tasks
 
 ## Architecture
 The service is built with two components:
 * FastAPI RESTFull service 
-* PostgreSQL 15 
+* PostgreSQL 16
+* Celery 5
+
+The sevice is using async scopped SQLAlchemy sessions. The service does the heavy lifting in terms of creating the database tables if none exist. Celery is using gevent concurrency since the tasks are I/O and scopped sqlalchemy sessions
 
 ## Development
 The repos uses [poetry](https://python-poetry.org/) for dependency management, building. Use the docker compose to run the service.
