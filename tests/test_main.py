@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from hobbes.models import *
 from hobbes.main import app
-from hobbes.db_manager import get_session
+from hobbes.db_manager import get_async_session
 
 tmp_dir = tempfile.TemporaryDirectory()
 
@@ -48,7 +48,7 @@ async def override_get_session():
         await db.close()
 
 
-app.dependency_overrides[get_session] = override_get_session
+app.dependency_overrides[get_async_session] = override_get_session
 
 client = TestClient(app)
 

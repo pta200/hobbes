@@ -1,12 +1,12 @@
 import logging
 from datetime import datetime
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from hobbes.crud import all_stats, date_filter_stats, filter_stats, insert_stat
 from hobbes.db_manager import get_async_session
-from hobbes.models import BookFilter, BookPayload, TaskResponse, Book
+from hobbes.models import BookFilter, BookPayload, TaskResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
-from hobbes.tasks import replay_task, inventory_books, search_inventory
+from hobbes.tasks import replay_task, archive_book, search_inventory_cll
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +28,11 @@ async def archive(payload: BookPayload) -> TaskResponse:
     """
     logger.debug("payload is %s", payload)
 
-    task = inventory_books.delay(payload.model_dump())
+    task = archive_book.delay(payload.model_dump())
     return TaskResponse(task_id=task.id,task_status=task.status,task_result=task.state)
 
-@stat_router.post("/task_book", status_code=201)
-async def archive(payload: BookPayload) -> TaskResponse:
+@stat_router.post("/inventory", status_code=201)
+async def inventory(payload: BookPayload) -> TaskResponse:
     """archive
 
     Args:
@@ -43,7 +43,7 @@ async def archive(payload: BookPayload) -> TaskResponse:
     """
     logger.debug("payload is %s", payload)
 
-    task = search_inventory.delay(payload.model_dump())
+    task = search_inventory_cll.delay(payload.model_dump())
     return TaskResponse(task_id=task.id,task_status=task.status,task_result=task.state)
 
 
@@ -143,7 +143,7 @@ async def get_status(task_id) -> TaskResponse:
         result = str(task.result)
     else:
         result = None
-    return TaskResponse(task_id=task.id, task_status=task.status, task_result=result)
+    return TaskResponse(task_id=task.id, task_status=task.status, task_result=result.info)
 
 
 @stat_router.put("/tasks/retry/{task_id}")

@@ -1,10 +1,10 @@
 import os
 import logging
 import celery
-from sqlmodel import and_, desc, select
+from sqlmodel import desc, select
 from hobbes.models import BookPayload
-from hobbes.task_db_manager import DBTask
-from hobbes.models import Book, BookPayload
+from hobbes.task_db_manager import DBTaskCM, DBTaskCll
+from hobbes.models import Book
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,16 @@ def send_email(recipient, subject, body):
     return True
 
 
-@celery.shared_task(name="inventory_books", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
-def inventory_books(self, payload: BookPayload):
+@celery.shared_task(name="archive_book", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
+def archive_book(self, payload: BookPayload):
+    """DBtask implementation that uses context manager Task subclass
+
+    Args:
+        payload (BookPayload): data payload
+
+    Returns:
+        [list]: list of json string formatted objects retrieve from db
+    """
     try:
         logger.info(payload)
         return True
@@ -37,18 +45,37 @@ def inventory_books(self, payload: BookPayload):
         if self.request.retries >= self.max_retries:
             logger.error("failed all retries")
         raise self.retry(exc=error, countdown=COUNTDOWN)
-    
-@celery.shared_task(base=DBTask, name="search_inventory", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
-def search_inventory(self, payload: BookPayload):
+
+@celery.shared_task(base=DBTaskCM, name="search_inventory_cm", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
+def search_inventory_cm(self, payload: BookPayload):
+    """DBtask implementation that uses callable Task subclass
+
+    Args:
+        payload (BookPayload): data payload
+
+    Returns:
+        [list]: list of json string formatted objects retrieve from db
+    """
     with self.get_session() as session:
         results = session.scalars(
             select(Book).order_by(desc(Book.create_datetimestamp))
         )
 
         json_strings = [item.model_dump_json() for item in results.all()]
-        return json_strings 
+        return json_strings
+
+    
+@celery.shared_task(base=DBTaskCll, name="search_inventory_cll", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
+def search_inventory_cll(self, payload: BookPayload):
+    results = self.session.scalars(
+        select(Book).order_by(desc(Book.create_datetimestamp))
+    )
+    # dumnp objects into a json list so celery can return
+    json_strings = [item.model_dump_json() for item in results.all()]
+    return json_strings 
+
 
 def replay_task(task_id):    
     meta = celery.backend.get_task_meta(task_id)
     task = celery.tasks[meta['name']]
-    task.apply_async(args=meta['args'], kwargs=meta['kwargs'])
+    return task.apply_async(args=meta['args'], kwargs=meta['kwargs'])

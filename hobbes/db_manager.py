@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseAsyncSessionManager:
-    """Database engine and session managment class"""
+    """Async database engine and session managment class for use in FastAPI lifespan"""
 
     def __init__(self):
         self._engine: AsyncEngine | None = None
@@ -24,6 +24,7 @@ class DatabaseAsyncSessionManager:
         self._engine = create_async_engine(
             database_url, echo=False, future=True, pool_size=5, max_overflow=10
         )
+        # async scoped session using event current task
         self._async_session = async_scoped_session(
             async_sessionmaker(
                 self._engine,
@@ -60,7 +61,7 @@ class DatabaseAsyncSessionManager:
         """
         await self._async_session.remove()
 
-
+# manager instance
 async_session_manager = DatabaseAsyncSessionManager()
 
 
