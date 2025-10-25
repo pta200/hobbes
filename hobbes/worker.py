@@ -8,5 +8,4 @@ logger = logging.getLogger(__name__)
 celery_app = Celery(__name__)
 
 # find tasks
-celery_app.autodiscover_tasks(['hobbes'])
-
+celery_app.autodiscover_tasks(["hobbes"])

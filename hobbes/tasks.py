@@ -19,6 +19,7 @@ def add(x, y):
     """Adds two numbers and returns the sum."""
     return x + y
 
+
 @celery.shared_task
 def send_email(recipient, subject, body):
     """Simulates sending an email."""
@@ -27,7 +28,13 @@ def send_email(recipient, subject, body):
     return True
 
 
-@celery.shared_task(name="archive_book", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
+@celery.shared_task(
+    name="archive_book",
+    bind=True,
+    max_retries=MAX_RETRIES,
+    retry_backoff=True,
+    pydantic=True,
+)
 def archive_book(self, payload: BookPayload):
     """DBtask implementation that uses context manager Task subclass
 
@@ -46,7 +53,15 @@ def archive_book(self, payload: BookPayload):
             logger.error("failed all retries")
         raise self.retry(exc=error, countdown=COUNTDOWN)
 
-@celery.shared_task(base=DBTaskCM, name="search_inventory_cm", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
+
+@celery.shared_task(
+    base=DBTaskCM,
+    name="search_inventory_cm",
+    bind=True,
+    max_retries=MAX_RETRIES,
+    retry_backoff=True,
+    pydantic=True,
+)
 def search_inventory_cm(self, payload: BookPayload):
     """DBtask implementation that uses callable Task subclass
 
@@ -64,18 +79,25 @@ def search_inventory_cm(self, payload: BookPayload):
         json_strings = [item.model_dump_json() for item in results.all()]
         return json_strings
 
-    
-@celery.shared_task(base=DBTaskCll, name="search_inventory_cll", bind=True, max_retries=MAX_RETRIES, retry_backoff=True, pydantic=True)
+
+@celery.shared_task(
+    base=DBTaskCll,
+    name="search_inventory_cll",
+    bind=True,
+    max_retries=MAX_RETRIES,
+    retry_backoff=True,
+    pydantic=True,
+)
 def search_inventory_cll(self, payload: BookPayload):
     results = self.session.scalars(
         select(Book).order_by(desc(Book.create_datetimestamp))
     )
     # dumnp objects into a json list so celery can return
     json_strings = [item.model_dump_json() for item in results.all()]
-    return json_strings 
+    return json_strings
 
 
-def replay_task(task_id):    
+def replay_task(task_id):
     meta = celery.backend.get_task_meta(task_id)
-    task = celery.tasks[meta['name']]
-    return task.apply_async(args=meta['args'], kwargs=meta['kwargs'])
+    task = celery.tasks[meta["name"]]
+    return task.apply_async(args=meta["args"], kwargs=meta["kwargs"])

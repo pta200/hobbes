@@ -17,27 +17,34 @@ class DatabaseSessionManager:
 
     def __init__(self):
         if os.getenv("SYNC_DATABASE_URL"):
-            self._engine = create_engine(os.getenv("SYNC_DATABASE_URL",""), echo=False, pool_size=5, max_overflow=10)
+            self._engine = create_engine(
+                os.getenv("SYNC_DATABASE_URL", ""),
+                echo=False,
+                pool_size=5,
+                max_overflow=10,
+            )
             self._session = scoped_session(
-                    sessionmaker(
-                        autocommit=False,
-                        autoflush=False,
-                        expire_on_commit=False,
-                        bind=self._engine 
-                    ),
-                    scopefunc=self.celery_task_scopefunc
-                )
-            
+                sessionmaker(
+                    autocommit=False,
+                    autoflush=False,
+                    expire_on_commit=False,
+                    bind=self._engine,
+                ),
+                scopefunc=self.celery_task_scopefunc,
+            )
+
     def get_session(self):
         return self._session()
-    
+
     def remove_session(self):
         self._session.remove()
 
+
 session_manager = DatabaseSessionManager()
 
+
 class DBTaskCM(Task):
-    """ Base celery task that includes context manager for SqlAlchemy scoped session"""
+    """Base celery task that includes context manager for SqlAlchemy scoped session"""
 
     @contextmanager
     def get_session(self):
@@ -53,7 +60,7 @@ class DBTaskCM(Task):
 
 
 class DBTaskCll(Task):
-    """ Base celery task with callable to include SqlAlchemy scoped session"""
+    """Base celery task with callable to include SqlAlchemy scoped session"""
 
     def __call__(self, *args, **kwargs):
         self.session = session_manager.get_session()

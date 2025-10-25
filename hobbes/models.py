@@ -34,6 +34,7 @@ class BookFilter(SQLModel):
     condition: Optional[str] = None
     create_datetimestamp: Optional[str] = None
 
+
 class TaskResponse(BaseModel):
     task_id: str
     task_status: str

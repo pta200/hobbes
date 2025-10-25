@@ -16,6 +16,7 @@ stat_router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+
 @stat_router.post("/archive_book", status_code=201)
 async def archive(payload: BookPayload) -> TaskResponse:
     """archive
@@ -29,7 +30,10 @@ async def archive(payload: BookPayload) -> TaskResponse:
     logger.debug("payload is %s", payload)
 
     task = archive_book.delay(payload.model_dump())
-    return TaskResponse(task_id=task.id,task_status=task.status,task_result=task.state)
+    return TaskResponse(
+        task_id=task.id, task_status=task.status, task_result=task.state
+    )
+
 
 @stat_router.post("/inventory", status_code=201)
 async def inventory(payload: BookPayload) -> TaskResponse:
@@ -44,8 +48,9 @@ async def inventory(payload: BookPayload) -> TaskResponse:
     logger.debug("payload is %s", payload)
 
     task = search_inventory_cll.delay(payload.model_dump())
-    return TaskResponse(task_id=task.id,task_status=task.status,task_result=task.state)
-
+    return TaskResponse(
+        task_id=task.id, task_status=task.status, task_result=task.state
+    )
 
 
 @stat_router.post("/book", status_code=201)
@@ -82,7 +87,9 @@ async def get_all_books(session: AsyncSession = Depends(get_async_session)):
 
 @stat_router.get("/getbydate")
 async def get_books_by_date(
-    date_param: datetime, compare: str, session: AsyncSession = Depends(get_async_session)
+    date_param: datetime,
+    compare: str,
+    session: AsyncSession = Depends(get_async_session),
 ):
     """query Books by date filter.
 
@@ -143,7 +150,9 @@ async def get_status(task_id) -> TaskResponse:
         result = str(task.result)
     else:
         result = None
-    return TaskResponse(task_id=task.id, task_status=task.status, task_result=result.info)
+    return TaskResponse(
+        task_id=task.id, task_status=task.status, task_result=result.info
+    )
 
 
 @stat_router.put("/tasks/retry/{task_id}")
@@ -158,9 +167,10 @@ async def replay_web_task(task_id) -> TaskResponse:
     """
     task = replay_task(task_id)
     if task:
-        return TaskResponse(task_id=task.id, task_status=task.status, task_result=task.result)
+        return TaskResponse(
+            task_id=task.id, task_status=task.status, task_result=task.result
+        )
     raise HTTPException(
         status_code=404,
         detail=f"unable to retry task id {task_id} as either the results have expired or the id is invalid",
     )
-

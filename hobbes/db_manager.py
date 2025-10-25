@@ -61,6 +61,7 @@ class DatabaseAsyncSessionManager:
         """
         await self._async_session.remove()
 
+
 # manager instance
 async_session_manager = DatabaseAsyncSessionManager()
 
