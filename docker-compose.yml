@@ -40,32 +40,32 @@ services:
     env_file:
       - development.env
 
-  # worker:
-  #   image: hobbes:latest
-  #   command:  ["worker", "-E -Ofair --loglevel=debug --pool=gevent --concurrency=100"]
-  #   container_name: worker
-  #   env_file:
-  #     - development.env
-  #   depends_on:
-  #     - service
-  #     - redis
+  worker:
+    image: hobbes:latest
+    command:  ["worker", "-E -Ofair --loglevel=debug --pool=gevent --concurrency=100"]
+    container_name: worker
+    env_file:
+      - development.env
+    depends_on:
+      - service
+      - redis
 
-  # dashboard:
-  #   image: hobbes:latest
-  #   command: ["dashboard"]
-  #   container_name: dashboard
-  #   ports:
-  #     - 5555:5555
-  #   env_file:
-  #     - development.env
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.flower.rule=PathPrefix(`/`)"
-  #   depends_on:
-  #     - service
-  #     - redis
-  #     - worker
+  dashboard:
+    image: hobbes:latest
+    command: ["dashboard"]
+    container_name: dashboard
+    ports:
+      - 5555:5555
+    env_file:
+      - development.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flower.rule=PathPrefix(`/`)"
+    depends_on:
+      - service
+      - redis
+      - worker
 
-  # redis:
-  #   image: redis:7
-  #   container_name: redis
+  redis:
+    image: redis:7
+    container_name: redis
