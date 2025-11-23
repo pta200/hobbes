@@ -39,3 +39,31 @@ class TaskResponse(BaseModel):
     task_id: str
     task_status: str
     task_result: str
+
+class TeamPayload(SQLModel):
+    name: str = Field(index=True)
+    headquarters: str
+
+class Team(TeamPayload, table=True):
+    tid: uuid.UUID = Field(
+        default_factory=uuid.uuid4, nullable=False, primary_key=True
+    )
+    create_datetimestamp: datetime = Field(
+        default_factory=gen_utcnow,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )
+
+class HeroPayload(SQLModel):
+    name: str = Field(index=True)
+    secret_name: str
+
+
+class Hero(HeroPayload, table=True):
+    hid: uuid.UUID = Field(
+        default_factory=uuid.uuid4, nullable=False, primary_key=True
+    )
+    team_id: uuid.UUID = Field(nullable=False, foreign_key="team.tid")
+    create_datetimestamp: datetime = Field(
+        default_factory=gen_utcnow,
+        sa_column=Column(DateTime(timezone=True), nullable=False),
+    )

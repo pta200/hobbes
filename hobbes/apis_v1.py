@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException
-from hobbes.crud import all_stats, date_filter_stats, filter_stats, insert_stat
+from hobbes.crud import all_books, date_filter_books, filter_books, insert_book
 from hobbes.db_manager import get_async_session
 from hobbes.models import BookFilter, BookPayload, TaskResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -10,14 +10,14 @@ from hobbes.tasks import replay_task, archive_book, search_inventory_cll
 
 logger = logging.getLogger(__name__)
 
-stat_router = APIRouter(
+book_router = APIRouter(
     prefix="/v1/books",
     tags=["Book Inventory"],
     responses={404: {"description": "Not found"}},
 )
 
 
-@stat_router.post("/archive_book", status_code=201)
+@book_router.post("/archive_book", status_code=201)
 async def archive(payload: BookPayload) -> TaskResponse:
     """archive
 
@@ -35,7 +35,7 @@ async def archive(payload: BookPayload) -> TaskResponse:
     )
 
 
-@stat_router.post("/inventory", status_code=201)
+@book_router.post("/inventory", status_code=201)
 async def inventory(payload: BookPayload) -> TaskResponse:
     """archive
 
@@ -53,7 +53,7 @@ async def inventory(payload: BookPayload) -> TaskResponse:
     )
 
 
-@stat_router.post("/book", status_code=201)
+@book_router.post("/book", status_code=201)
 async def insert_book(
     payload: BookPayload, session: AsyncSession = Depends(get_async_session)
 ):
@@ -68,11 +68,11 @@ async def insert_book(
         json: status ok
     """
     logger.debug("payload is %s", payload)
-    await insert_stat(payload, session)
+    await insert_book(payload, session)
     return {"status": "ok"}
 
 
-@stat_router.get("/all")
+@book_router.get("/all")
 async def get_all_books(session: AsyncSession = Depends(get_async_session)):
     """get all Books
 
@@ -82,10 +82,10 @@ async def get_all_books(session: AsyncSession = Depends(get_async_session)):
     Returns:
         List[Book]: list of Book objects
     """
-    return await all_stats(session)
+    return await all_books(session)
 
 
-@stat_router.get("/getbydate")
+@book_router.get("/getbydate")
 async def get_books_by_date(
     date_param: datetime,
     compare: str,
@@ -101,10 +101,10 @@ async def get_books_by_date(
     Returns:
         List[Book]: list of Book objects
     """
-    return await date_filter_stats(date_param, compare, session)
+    return await date_filter_books(date_param, compare, session)
 
 
-@stat_router.post("/search")
+@book_router.post("/search")
 async def search_books(
     filter: BookFilter, session: AsyncSession = Depends(get_async_session)
 ):
@@ -130,10 +130,10 @@ async def search_books(
     Returns:
         List[Book]: list of Book objects
     """
-    return await filter_stats(filter.model_dump(exclude_none=True), session)
+    return await filter_books(filter.model_dump(exclude_none=True), session)
 
 
-@stat_router.get("/tasks/status/{task_id}")
+@book_router.get("/tasks/status/{task_id}")
 async def get_status(task_id) -> TaskResponse:
     """retrieve task status from result backend using task UUID
 
@@ -155,7 +155,7 @@ async def get_status(task_id) -> TaskResponse:
     )
 
 
-@stat_router.put("/tasks/retry/{task_id}")
+@book_router.put("/tasks/retry/{task_id}")
 async def replay_web_task(task_id) -> TaskResponse:
     """_summary_
 

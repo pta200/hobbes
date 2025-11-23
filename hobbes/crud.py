@@ -2,10 +2,10 @@ import logging
 import re
 from datetime import datetime
 
-from hobbes.models import Book, BookPayload
+from hobbes.models import Book, BookPayload, Hero, Team, TeamPayload, HeroPayload
 from sqlalchemy import types
 from sqlalchemy.orm import class_mapper
-from sqlmodel import and_, desc, select
+from sqlmodel import and_, desc, select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -102,7 +102,7 @@ def build_query(table, filter_by):
     return filters
 
 
-async def insert_stat(payload: BookPayload, session: AsyncSession):
+async def insert_book(payload: BookPayload, session: AsyncSession):
     """insert render stat row
 
     Args:
@@ -120,7 +120,7 @@ async def insert_stat(payload: BookPayload, session: AsyncSession):
     return
 
 
-async def all_stats(session: AsyncSession):
+async def all_books(session: AsyncSession):
     """query for all render stats in the table
 
     Args:
@@ -135,7 +135,7 @@ async def all_stats(session: AsyncSession):
     return results.all()
 
 
-async def date_filter_stats(date_param: datetime, compare: str, session: AsyncSession):
+async def date_filter_books(date_param: datetime, compare: str, session: AsyncSession):
     """Filter render stats by date
 
     Args:
@@ -161,7 +161,7 @@ async def date_filter_stats(date_param: datetime, compare: str, session: AsyncSe
     return results.all()
 
 
-async def filter_stats(filter_param: str, session: AsyncSession):
+async def filter_books(filter_param: str, session: AsyncSession):
     """Filter render stats by any and all fields
 
     Args:
@@ -175,3 +175,69 @@ async def filter_stats(filter_param: str, session: AsyncSession):
         select(Book).filter(and_(*build_query(Book, filter_param)))
     )
     return results.all()
+
+async def search_recent_team_member(session: AsyncSession):
+    """
+    https://medium.com/@umair.qau586/sqlalchemy-seriespart-3-mastering-sqlalchemy-queries-and-aggregation-597befb46b09
+
+    Args:
+        session (AsyncSession): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    sub = await session.scalars(select(
+            Team.name,
+            func.rank().over(
+                order_by=desc(Hero.create_datetimestamp),partition_by=Team.name)
+            ).select_from(Team).label("rank")
+            ).subquery()
+            
+        
+    result = await session.scalars(
+        select(sub).filter(sub.c.rank==1)
+    )
+    resp = []
+    logger.info(result)
+    for hero, team in result:
+        logger.info("Hero:", hero, "Team:", team)
+        resp[team] = hero
+    return resp
+
+async def insert_team(payload: TeamPayload, session: AsyncSession):
+    """insert render stat row
+
+    Args:
+        payload (BookPayload): payload from endpoint
+        session (AsyncSession): SQLAlchemy scoped async session object
+    """
+    session.add(
+        Team(
+            name=payload.name,
+            headquarters=payload.headquarters
+        )
+    )
+    await session.commit()
+    return
+
+async def insert_hero(payload: HeroPayload, team: str, session: AsyncSession):
+    """insert render stat row
+
+    Args:
+        payload (BookPayload): payload from endpoint
+        session (AsyncSession): SQLAlchemy scoped async session object
+    """
+    resp = await session.scalars(
+        select(Team).where(Team.name==team)
+    )
+    tt = resp.one_or_none()
+    session.add(
+        Hero(
+            name=payload.name,
+            secret_name=payload.secret_name,
+            team_id=tt.tid
+        )
+    )
+    await session.commit()
+    return

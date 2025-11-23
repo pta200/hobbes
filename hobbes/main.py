@@ -5,7 +5,8 @@ import tomli
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from hobbes.apis_v1 import stat_router
+from hobbes.apis_v1 import book_router
+from hobbes.teams import teams_router
 from hobbes.db_manager import async_session_manager
 
 logger = logging.getLogger(__name__)
@@ -43,7 +44,8 @@ app = FastAPI(
 )
 
 # add api endpoint
-app.include_router(stat_router)
+app.include_router(book_router)
+app.include_router(teams_router)
 
 
 @app.get("/health")
