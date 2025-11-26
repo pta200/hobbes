@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-import tomli
+import tomllib
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
 # get project version from pyproject.toml
 version = "0.0.1"
 with open(Path(__file__).parent.parent / "pyproject.toml", "rb") as f:
-    toml_dict = tomli.load(f)
+    toml_dict = tomllib.load(f)
     version = toml_dict["project"]["version"]
 
 

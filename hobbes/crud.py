@@ -102,7 +102,7 @@ def build_query(table, filter_by):
     return filters
 
 
-async def insert_book(payload: BookPayload, session: AsyncSession):
+async def add_book(payload: BookPayload, session: AsyncSession):
     """insert render stat row
 
     Args:

@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.10-slim-buster
+FROM python:3.12-slim
 
 # set working directory
 WORKDIR /app
@@ -13,8 +13,14 @@ ENV PYTHONUNBUFFERED 1
 #    && apt-get -y install vim\
 #    && apt-get clean
 
-# copy files and install python dependencies
+# Copy only the dependency files
+COPY pyproject.toml poetry.lock ./
+
+
+#install python dependencies
+RUN pip install poetry; poetry config virtualenvs.create false; poetry install --no-root --no-interaction --no-ansi
+
+# copy app
 COPY . .
-RUN pip install poetry; poetry config virtualenvs.create false; poetry install --only main --no-interaction --no-ansi
 
 ENTRYPOINT [ "./run_service.sh"]

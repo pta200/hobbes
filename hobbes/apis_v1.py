@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException
-from hobbes.crud import all_books, date_filter_books, filter_books, insert_book
+from hobbes.crud import all_books, date_filter_books, filter_books, add_book
 from hobbes.db_manager import get_async_session
 from hobbes.models import BookFilter, BookPayload, TaskResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -68,7 +68,7 @@ async def insert_book(
         json: status ok
     """
     logger.debug("payload is %s", payload)
-    await insert_book(payload, session)
+    await add_book(payload, session)
     return {"status": "ok"}
 
 

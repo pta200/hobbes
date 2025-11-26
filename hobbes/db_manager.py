@@ -3,12 +3,13 @@ from asyncio import current_task
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    AsyncSession,
+    # AsyncSession,
     async_scoped_session,
     async_sessionmaker,
     create_async_engine,
 )
 from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class DatabaseAsyncSessionManager:
             async_sessionmaker(
                 self._engine,
                 expire_on_commit=False,
+                class_=AsyncSession
             ),
             scopefunc=current_task,
         )
