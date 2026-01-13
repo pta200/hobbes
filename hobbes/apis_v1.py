@@ -54,7 +54,7 @@ async def inventory(payload: BookPayload) -> TaskResponse:
     )
 
 
-@book_router.post("/book", status_code=201)
+@book_router.post("/book", status_code=status.HTTP_201_CREATED)
 async def insert_book(
     payload: BookPayload,
     session: AsyncSession = Depends(get_async_session),
