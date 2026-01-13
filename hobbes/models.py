@@ -1,8 +1,9 @@
 import uuid
+import enum
 from datetime import datetime, timezone
 from typing import Optional
 from pydantic import BaseModel
-from sqlmodel import Column, DateTime, Field, SQLModel
+from sqlmodel import Column, DateTime, Field, SQLModel, JSON, Enum
 
 
 def gen_utcnow():
@@ -57,6 +58,18 @@ class HeroPayload(SQLModel):
     name: str = Field(index=True)
     secret_name: str
 
+class MutantClass(str, enum.Enum):
+    """Mutant hero types"""
+
+    PYPI = "pypi"
+    ARCHIVE = "archive"
+    GIT = "git"
+    OMEGA = "omega"
+    ALPHA = "alpha"
+    BETA = "beta"
+    GAMMA = "Gamma"
+    DELTA = "delta"
+    EPSILON = "epsilon"
 
 class Hero(HeroPayload, table=True):
     hid: uuid.UUID = Field(
@@ -67,3 +80,11 @@ class Hero(HeroPayload, table=True):
         default_factory=gen_utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
+    level = MutantClass = Field(
+        sa_column=Column(
+            Enum(MutantClass),
+            nullable=False,
+        )
+    )
+    # variant for testing with sqlite
+    powers: dict = Field(sa_column=Column(JSONB().with_variant(JSON, "sqlite")))
