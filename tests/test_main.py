@@ -54,7 +54,7 @@ client = TestClient(app)
 
 
 @pytest.mark.asyncio
-async def test_create_stat():
+async def test_create_book():
     await init_db()
     data = {
         "title": "Count of Monte Cristo",
@@ -70,14 +70,14 @@ async def test_create_stat():
 
 
 @pytest.mark.asyncio
-async def test_get_stat():
+async def test_get_books():
     await init_db()
     response = client.get("/v1/books/all")
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_get_stat_by_date():
+async def test_get_book_by_date():
     await init_db()
 
     data = {
@@ -98,7 +98,7 @@ async def test_get_stat_by_date():
 
 
 @pytest.mark.asyncio
-async def test_search_stat():
+async def test_search_book():
     await init_db()
 
     data = {
