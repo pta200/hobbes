@@ -1,3 +1,7 @@
+"""
+Authentication provider for Flower Dashboard which uses Tornado webserver
+"""
+
 import os
 import logging
 
