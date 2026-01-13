@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, Security, status
+from hobbes.iam import TokenData, validate_token
 from hobbes.crud import all_books, date_filter_books, filter_books, add_book
 from hobbes.db_manager import get_async_session
 from hobbes.models import BookFilter, BookPayload, TaskResponse
@@ -55,7 +56,9 @@ async def inventory(payload: BookPayload) -> TaskResponse:
 
 @book_router.post("/book", status_code=201)
 async def insert_book(
-    payload: BookPayload, session: AsyncSession = Depends(get_async_session)
+    payload: BookPayload,
+    session: AsyncSession = Depends(get_async_session),
+    token: Annotated[TokenData, Security(validate_token, scopes=["write"])]
 ):
     """endpoint to insert a book. Hands it off to a background task so the API can return immediately
 
@@ -67,7 +70,7 @@ async def insert_book(
     Returns:
         json: status ok
     """
-    logger.debug("payload is %s", payload)
+    logger.debug("payload is %s %s", payload, token.username)
     await add_book(payload, session)
     return {"status": "ok"}
 
