@@ -80,7 +80,7 @@ class Hero(HeroPayload, table=True):
         default_factory=gen_utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
-    level = MutantClass = Field(
+    level: MutantClass = Field(
         sa_column=Column(
             Enum(MutantClass),
             nullable=False,
