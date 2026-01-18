@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from pydantic import BaseModel
 from sqlmodel import Column, DateTime, Field, SQLModel, JSON, Enum
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 def gen_utcnow():
@@ -27,6 +28,10 @@ class Book(BookPayload, table=True):
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
 
+class PaginationResponse(SQLModel):
+    total: int
+    rows: list
+    
 
 class BookFilter(SQLModel):
     title: Optional[str] = None
@@ -61,9 +66,6 @@ class HeroPayload(SQLModel):
 class MutantClass(str, enum.Enum):
     """Mutant hero types"""
 
-    PYPI = "pypi"
-    ARCHIVE = "archive"
-    GIT = "git"
     OMEGA = "omega"
     ALPHA = "alpha"
     BETA = "beta"

@@ -52,21 +52,21 @@ class LDAPAuth:
         connection = None
         try:
 
-            servers = []
-            for url in ldap_urls:
-                servers.append(ldap3.Server(host=url, connect_timeout=connect_timeout))
+            # servers = []
+            # for url in ldap_urls:
+            #     servers.append(ldap3.Server(host=url, connect_timeout=connect_timeout))
 
-            pool = ldap3.ServerPool(servers, pool_strategy=ldap3.FIRST, active=True, exhaust=True)
+            # pool = ldap3.ServerPool(servers, pool_strategy=ldap3.FIRST, active=True, exhaust=True)
 
-            connection = ldap3.Connection(
-                server=pool,
-                user=f"{username}@{auth_domain}",
-                password=password,
-                auto_bind=True,
-                raise_exceptions=True,
-                receive_timeout=receive_timeout,
-                client_strategy=ldap3.SAFE_SYNC,
-            )
+            # connection = ldap3.Connection(
+            #     server=pool,
+            #     user=f"{username}@{auth_domain}",
+            #     password=password,
+            #     auto_bind=True,
+            #     raise_exceptions=True,
+            #     receive_timeout=receive_timeout,
+            #     client_strategy=ldap3.SAFE_SYNC,
+            # )
             logger.debug("ldap auth success.....")
 
             return ["read", "write"]

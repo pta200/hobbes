@@ -1,11 +1,12 @@
 import logging
 from datetime import datetime
+from typing import Annotated
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, Security, status
 from hobbes.iam import TokenData, validate_token
 from hobbes.crud import all_books, date_filter_books, filter_books, add_book
 from hobbes.db_manager import get_async_session
-from hobbes.models import BookFilter, BookPayload, TaskResponse
+from hobbes.models import BookFilter, BookPayload, TaskResponse, Book, PaginationResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 from hobbes.tasks import replay_task, archive_book, search_inventory_cll
 
@@ -54,12 +55,12 @@ async def inventory(payload: BookPayload) -> TaskResponse:
     )
 
 
-@book_router.post("/book", status_code=status.HTTP_201_CREATED)
+@book_router.post("", status_code=status.HTTP_201_CREATED)
 async def insert_book(
     payload: BookPayload,
+    token: Annotated[TokenData, Security(validate_token, scopes=["write"])],
     session: AsyncSession = Depends(get_async_session),
-    token: Annotated[TokenData, Security(validate_token, scopes=["write"])]
-):
+) -> Book:
     """endpoint to insert a book. Hands it off to a background task so the API can return immediately
 
     Args:
@@ -71,12 +72,14 @@ async def insert_book(
         json: status ok
     """
     logger.debug("payload is %s %s", payload, token.username)
-    await add_book(payload, session)
-    return {"status": "ok"}
+    return await add_book(payload, session)
 
 
-@book_router.get("/all")
-async def get_all_books(session: AsyncSession = Depends(get_async_session)):
+@book_router.get("", operation_id="get_all")
+async def get_all_books(
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+    session: AsyncSession = Depends(get_async_session)) -> PaginationResponse:
     """get all Books
 
     Args:
@@ -85,7 +88,7 @@ async def get_all_books(session: AsyncSession = Depends(get_async_session)):
     Returns:
         List[Book]: list of Book objects
     """
-    return await all_books(session)
+    return await all_books(session, offset, limit)
 
 
 @book_router.get("/getbydate")

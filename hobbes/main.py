@@ -5,13 +5,20 @@ import tomllib
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from hobbes.apis_v1 import book_router
 from hobbes.teams import teams_router
 from hobbes.db_manager import async_session_manager
-
+from hobbes.iam import auth_router
 logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.environ.get("ASYNC_DATABASE_URL")
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:5173",
+]
 
 
 @asynccontextmanager
@@ -43,9 +50,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# cors
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # add api endpoint
 app.include_router(book_router)
 app.include_router(teams_router)
+app.include_router(auth_router)
 
 
 @app.get("/health")

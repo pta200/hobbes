@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import datetime
 
-from hobbes.models import Book, BookPayload, Hero, Team, TeamPayload, HeroPayload
+from hobbes.models import Book, BookPayload, Hero, Team, TeamPayload, HeroPayload, PaginationResponse
 from sqlalchemy import types
 from sqlalchemy.orm import class_mapper
 from sqlmodel import and_, desc, select, func
@@ -117,10 +117,10 @@ async def add_book(payload: BookPayload, session: AsyncSession):
     )
     session.add(book)
     await session.commit()
-    return
+    return book
 
 
-async def all_books(session: AsyncSession):
+async def all_books(session: AsyncSession, offset: int, limit: int) -> PaginationResponse:
     """query for all render stats in the table
 
     Args:
@@ -129,10 +129,17 @@ async def all_books(session: AsyncSession):
     Returns:
         List[Book]: List of render stat objects
     """
+    result = await session.exec(select(func.count()).select_from(Book))
+    total = result.one()
+
     results = await session.scalars(
-        select(Book).order_by(desc(Book.create_datetimestamp))
+        select(Book).order_by(desc(Book.create_datetimestamp)).offset(offset).limit(limit)
     )
-    return results.all()
+    response = PaginationResponse(
+        total=total,
+        rows=results.all()
+    )
+    return response
 
 
 async def date_filter_books(date_param: datetime, compare: str, session: AsyncSession):
