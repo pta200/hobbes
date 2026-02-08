@@ -1,92 +1,41 @@
 import uuid
 from fastapi.testclient import TestClient
-import tempfile
+from datetime import datetime, timezone
 import pytest
 import urllib.parse
-from asyncio import current_task
-from sqlmodel import SQLModel
-from sqlalchemy.pool import StaticPool
-from sqlalchemy.ext.asyncio import (
-    async_sessionmaker,
-    create_async_engine,
-    async_scoped_session,
-)
-from hobbes.models import *
-from hobbes.main import app
-from hobbes.db_manager import get_async_session
-
-# tmp_dir = tempfile.TemporaryDirectory()
-
-# SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///{tmp_dir.name}/hobbes.db"
-
-# engine = create_async_engine(
-#     SQLALCHEMY_DATABASE_URL,
-#     connect_args={"check_same_thread": False},
-#     poolclass=StaticPool,
-# )
-# TestingSessionLocal = async_scoped_session(
-#     async_sessionmaker(
-#         engine,
-#         expire_on_commit=False,
-#     ),
-#     scopefunc=current_task,
-# )
-
-
-# async def init_db():
-#     """create all tables"""
-#     async with engine.begin() as conn:
-#         await conn.run_sync(SQLModel.metadata.create_all)
-
-
-# async def override_get_session():
-#     """session overide function"""
-#     try:
-#         db = TestingSessionLocal()
-#         yield db
-#     finally:
-#         await db.close()
-
-
-# app.dependency_overrides[get_async_session] = override_get_session
-
-# client = TestClient(app)
 
 
 @pytest.mark.asyncio
-async def test_create_book(client):
+async def test_create_book(client: TestClient, token: str):
     data = {
         "title": "Count of Monte Cristo",
         "isbn": f"{uuid.uuid4()}",
         "genre": "mystery",
         "condition": "new",
     }
+    
     response = client.post(
-        "/v1/books/book",
+        "/v1/books",
         json=data,
+        headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 201
 
 
 @pytest.mark.asyncio
-async def test_get_books(client):
-    response = client.get("/v1/books/all")
+async def test_get_books(client: TestClient):
+    response = client.get("/v1/books")
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_get_book_by_date(client):
-    data = {
-        "title": "Count of Monte Cristo",
-        "isbn": f"{uuid.uuid4()}",
-        "genre": "mystery",
-        "condition": "new",
-    }
-    response = client.post(
-        "/v1/books/book",
-        json=data,
+async def test_get_book_by_date(client: TestClient, token: str):
+    response = client.get(
+        "/v1/books/getbydate",
+        params={"date_param": str(datetime.now(timezone.utc)),"compare": "gt"},
+        headers={"Authorization": f"Bearer {token}"}
     )
-    assert response.status_code == 201
+    assert response.status_code == 200
 
     now = urllib.parse.quote(datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
     response = client.get(f"v1/books/getbydate?date_param={now}&compare=gt")
@@ -94,7 +43,7 @@ async def test_get_book_by_date(client):
 
 
 @pytest.mark.asyncio
-async def test_search_book(client):
+async def test_search_book(client: TestClient, token: str):
     data = {
         "title": "Count of Monte Cristo",
         "isbn": f"{uuid.uuid4()}",
@@ -102,8 +51,9 @@ async def test_search_book(client):
         "condition": "new",
     }
     response = client.post(
-        "/v1/books/book",
+        "/v1/books",
         json=data,
+        headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 201
 
@@ -113,5 +63,6 @@ async def test_search_book(client):
     response = client.post(
         "/v1/books/search",
         json=data,
+        headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 200

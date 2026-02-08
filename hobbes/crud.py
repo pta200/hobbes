@@ -132,7 +132,7 @@ async def all_books(session: AsyncSession, offset: int, limit: int) -> Paginatio
     result = await session.exec(select(func.count()).select_from(Book))
     total = result.one()
 
-    results = await session.scalars(
+    results = await session.exec(
         select(Book).order_by(desc(Book.create_datetimestamp)).offset(offset).limit(limit)
     )
     response = PaginationResponse(
@@ -154,13 +154,13 @@ async def date_filter_books(date_param: datetime, compare: str, session: AsyncSe
         List[Book]: List of render stat objects
     """
     if compare == "gt":
-        results = await session.scalars(
+        results = await session.exec(
             select(Book)
             .where(Book.create_datetimestamp > date_param)
             .order_by(desc(Book.create_datetimestamp))
         )
     else:
-        results = await session.scalars(
+        results = await session.exec(
             select(Book)
             .where(Book.create_datetimestamp < date_param)
             .order_by(desc(Book.create_datetimestamp))
@@ -178,7 +178,7 @@ async def filter_books(filter_param: str, session: AsyncSession):
     Returns:
         List[Book]: List of render stat objects
     """
-    results = await session.scalars(
+    results = await session.exec(
         select(Book).filter(and_(*build_query(Book, filter_param)))
     )
     return results.all()

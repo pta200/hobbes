@@ -18,6 +18,7 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
+testing_mode = int(os.getenv("TESTING_MODE", "0"))
 jwt_key = os.getenv("JWT_KEY", "abc123Test")
 jwt_alg = os.getenv("JWT_ALG", "HS256")
 auth_domain = os.getenv("LDAP_AUTH_DOMAIN")
@@ -51,22 +52,25 @@ class LDAPAuth:
         """
         connection = None
         try:
+            if testing_mode == 1:
+                logger.debug("testing so return")
+                return ["read", "write"]
 
-            # servers = []
-            # for url in ldap_urls:
-            #     servers.append(ldap3.Server(host=url, connect_timeout=connect_timeout))
+            servers = []
+            for url in ldap_urls:
+                servers.append(ldap3.Server(host=url, connect_timeout=connect_timeout))
 
-            # pool = ldap3.ServerPool(servers, pool_strategy=ldap3.FIRST, active=True, exhaust=True)
+            pool = ldap3.ServerPool(servers, pool_strategy=ldap3.FIRST, active=True, exhaust=True)
 
-            # connection = ldap3.Connection(
-            #     server=pool,
-            #     user=f"{username}@{auth_domain}",
-            #     password=password,
-            #     auto_bind=True,
-            #     raise_exceptions=True,
-            #     receive_timeout=receive_timeout,
-            #     client_strategy=ldap3.SAFE_SYNC,
-            # )
+            connection = ldap3.Connection(
+                server=pool,
+                user=f"{username}@{auth_domain}",
+                password=password,
+                auto_bind=True,
+                raise_exceptions=True,
+                receive_timeout=receive_timeout,
+                client_strategy=ldap3.SAFE_SYNC,
+            )
             logger.debug("ldap auth success.....")
 
             return ["read", "write"]

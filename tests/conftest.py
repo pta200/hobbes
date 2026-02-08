@@ -1,7 +1,7 @@
 import asyncio
 import tempfile
 from asyncio import current_task
-
+from datetime import timedelta
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
@@ -17,6 +17,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from hobbes.models import *
 from hobbes.main import app
 from hobbes.db_manager import get_async_session
+from hobbes.iam import create_access_token
 
 tmp_dir = tempfile.TemporaryDirectory()
 
@@ -53,7 +54,15 @@ app.dependency_overrides[get_async_session] = override_get_async_session
 asyncio.run(init_db())
 
 
-@pytest_asyncio.fixture
-async def client():
+@pytest_asyncio.fixture(scope="function")
+async def client() -> TestClient:
     # init test client with app without entering lifespan context
     return TestClient(app)
+
+@pytest_asyncio.fixture(scope="function")
+async def token() -> str:
+    access_token_expires = timedelta(minutes=5)
+    access_token = await create_access_token(
+        data={"sub": 'tester', "scope": ["read", "write"]}, expires_delta=access_token_expires
+    )
+    return access_token

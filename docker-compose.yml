@@ -28,7 +28,7 @@ services:
       - development.env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fastapi.rule=PathPrefix(`/docs`) || PathPrefix(`/v1`) || PathPrefix(`/openapi.json`)"
+      - "traefik.http.routers.fastapi.rule=PathPrefix(`/docs`) || PathPrefix(`/v1`) || PathPrefix(`/auth`) || PathPrefix(`/openapi.json`)"
     depends_on:
       - db
 
