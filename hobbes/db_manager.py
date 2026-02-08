@@ -3,7 +3,6 @@ from asyncio import current_task
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    # AsyncSession,
     async_scoped_session,
     async_sessionmaker,
     create_async_engine,
@@ -28,9 +27,7 @@ class DatabaseAsyncSessionManager:
         # async scoped session using event current task
         self._async_session = async_scoped_session(
             async_sessionmaker(
-                self._engine,
-                expire_on_commit=False,
-                class_=AsyncSession
+                self._engine, expire_on_commit=False, class_=AsyncSession
             ),
             scopefunc=current_task,
         )

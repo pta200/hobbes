@@ -13,11 +13,9 @@ async def test_create_book(client: TestClient, token: str):
         "genre": "mystery",
         "condition": "new",
     }
-    
+
     response = client.post(
-        "/v1/books",
-        json=data,
-        headers={"Authorization": f"Bearer {token}"}
+        "/v1/books", json=data, headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 201
 
@@ -32,8 +30,8 @@ async def test_get_books(client: TestClient):
 async def test_get_book_by_date(client: TestClient, token: str):
     response = client.get(
         "/v1/books/getbydate",
-        params={"date_param": str(datetime.now(timezone.utc)),"compare": "gt"},
-        headers={"Authorization": f"Bearer {token}"}
+        params={"date_param": str(datetime.now(timezone.utc)), "compare": "gt"},
+        headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 200
 
@@ -51,9 +49,7 @@ async def test_search_book(client: TestClient, token: str):
         "condition": "new",
     }
     response = client.post(
-        "/v1/books",
-        json=data,
-        headers={"Authorization": f"Bearer {token}"}
+        "/v1/books", json=data, headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 201
 
@@ -61,8 +57,6 @@ async def test_search_book(client: TestClient, token: str):
     data = {"create_datetimestamp": f"<{now}", "cores": "5"}
 
     response = client.post(
-        "/v1/books/search",
-        json=data,
-        headers={"Authorization": f"Bearer {token}"}
+        "/v1/books/search", json=data, headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 200

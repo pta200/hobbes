@@ -8,6 +8,15 @@ from gevent import getcurrent as gevent_getcurrent
 
 logger = logging.getLogger(__name__)
 
+DB_USERNAME = os.environ.get("DB_USERNAME", "")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_HOST = os.environ.get("DB_HOST", "")
+DB_PORT = os.environ.get("DB_PORT", "")
+DB_NAME = os.environ.get("DB_NAME", "")
+SYNC_DATABASE_URL = (
+    f"postgresql+psycopg://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
 
 class DatabaseSessionManager:
     """Sync database engine and session managment class for use in Celery workers"""
@@ -18,7 +27,7 @@ class DatabaseSessionManager:
     def __init__(self):
         if os.getenv("SYNC_DATABASE_URL"):
             self._engine = create_engine(
-                os.getenv("SYNC_DATABASE_URL", ""),
+                SYNC_DATABASE_URL,
                 echo=False,
                 pool_size=5,
                 max_overflow=10,

@@ -59,10 +59,12 @@ async def client() -> TestClient:
     # init test client with app without entering lifespan context
     return TestClient(app)
 
+
 @pytest_asyncio.fixture(scope="function")
 async def token() -> str:
     access_token_expires = timedelta(minutes=5)
     access_token = await create_access_token(
-        data={"sub": 'tester', "scope": ["read", "write"]}, expires_delta=access_token_expires
+        data={"sub": "tester", "scope": ["read", "write"]},
+        expires_delta=access_token_expires,
     )
     return access_token

@@ -60,7 +60,9 @@ class LDAPAuth:
             for url in ldap_urls:
                 servers.append(ldap3.Server(host=url, connect_timeout=connect_timeout))
 
-            pool = ldap3.ServerPool(servers, pool_strategy=ldap3.FIRST, active=True, exhaust=True)
+            pool = ldap3.ServerPool(
+                servers, pool_strategy=ldap3.FIRST, active=True, exhaust=True
+            )
 
             connection = ldap3.Connection(
                 server=pool,
@@ -105,7 +107,9 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-async def validate_token(security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
+async def validate_token(
+    security_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]
+) -> TokenData:
     """
     Validate oauth bearer token sent in client request authorization header
 
@@ -193,6 +197,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> T
         )
     access_token_expires = timedelta(minutes=access_token_expire_minutes)
     access_token = await create_access_token(
-        data={"sub": form_data.username, "scope": auth_scopes}, expires_delta=access_token_expires
+        data={"sub": form_data.username, "scope": auth_scopes},
+        expires_delta=access_token_expires,
     )
     return Token(access_token=access_token, token_type="bearer")

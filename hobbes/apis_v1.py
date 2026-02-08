@@ -6,7 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, Security
 from hobbes.iam import TokenData, validate_token
 from hobbes.crud import all_books, date_filter_books, filter_books, add_book
 from hobbes.db_manager import get_async_session
-from hobbes.models import BookFilter, BookPayload, TaskResponse, Book, PaginationResponse
+from hobbes.models import (
+    BookFilter,
+    BookPayload,
+    TaskResponse,
+    Book,
+    PaginationResponse,
+)
 from sqlmodel.ext.asyncio.session import AsyncSession
 from hobbes.tasks import replay_task, archive_book, search_inventory_cll
 
@@ -79,7 +85,8 @@ async def insert_book(
 async def get_all_books(
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
-    session: AsyncSession = Depends(get_async_session)) -> PaginationResponse:
+    session: AsyncSession = Depends(get_async_session),
+) -> PaginationResponse:
     """get all Books
 
     Args:

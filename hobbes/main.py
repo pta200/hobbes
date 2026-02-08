@@ -10,9 +10,17 @@ from hobbes.apis_v1 import book_router
 from hobbes.teams import teams_router
 from hobbes.db_manager import async_session_manager
 from hobbes.iam import auth_router
+
 logger = logging.getLogger(__name__)
 
-DATABASE_URL = os.environ.get("ASYNC_DATABASE_URL")
+DB_USERNAME = os.environ.get("DB_USERNAME")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_HOST = os.environ.get("DB_HOST")
+DB_PORT = os.environ.get("DB_PORT")
+DB_NAME = os.environ.get("DB_NAME")
+DATABASE_URL = (
+    f"postgresql+asyncpg://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
 
 origins = [
     "http://localhost",

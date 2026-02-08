@@ -2,7 +2,15 @@ import logging
 import re
 from datetime import datetime
 
-from hobbes.models import Book, BookPayload, Hero, Team, TeamPayload, HeroPayload, PaginationResponse
+from hobbes.models import (
+    Book,
+    BookPayload,
+    Hero,
+    Team,
+    TeamPayload,
+    HeroPayload,
+    PaginationResponse,
+)
 from sqlalchemy import types
 from sqlalchemy.orm import class_mapper
 from sqlmodel import and_, desc, select, func
@@ -120,7 +128,9 @@ async def add_book(payload: BookPayload, session: AsyncSession):
     return book
 
 
-async def all_books(session: AsyncSession, offset: int, limit: int) -> PaginationResponse:
+async def all_books(
+    session: AsyncSession, offset: int, limit: int
+) -> PaginationResponse:
     """query for all render stats in the table
 
     Args:
@@ -133,12 +143,12 @@ async def all_books(session: AsyncSession, offset: int, limit: int) -> Paginatio
     total = result.one()
 
     results = await session.exec(
-        select(Book).order_by(desc(Book.create_datetimestamp)).offset(offset).limit(limit)
+        select(Book)
+        .order_by(desc(Book.create_datetimestamp))
+        .offset(offset)
+        .limit(limit)
     )
-    response = PaginationResponse(
-        total=total,
-        rows=results.all()
-    )
+    response = PaginationResponse(total=total, rows=results.all())
     return response
 
 
@@ -183,6 +193,7 @@ async def filter_books(filter_param: str, session: AsyncSession):
     )
     return results.all()
 
+
 async def search_recent_team_member(session: AsyncSession):
     """
     https://medium.com/@umair.qau586/sqlalchemy-seriespart-3-mastering-sqlalchemy-queries-and-aggregation-597befb46b09
@@ -194,23 +205,25 @@ async def search_recent_team_member(session: AsyncSession):
         _type_: _description_
     """
 
-    sub = await session.scalars(select(
+    sub = await session.scalars(
+        select(
             Team.name,
             func.rank().over(
-                order_by=desc(Hero.create_datetimestamp),partition_by=Team.name)
-            ).select_from(Team).label("rank")
-            ).subquery()
-            
-        
-    result = await session.scalars(
-        select(sub).filter(sub.c.rank==1)
-    )
+                order_by=desc(Hero.create_datetimestamp), partition_by=Team.name
+            ),
+        )
+        .select_from(Team)
+        .label("rank")
+    ).subquery()
+
+    result = await session.scalars(select(sub).filter(sub.c.rank == 1))
     resp = []
     logger.info(result)
     for hero, team in result:
         logger.info("Hero:", hero, "Team:", team)
         resp[team] = hero
     return resp
+
 
 async def insert_team(payload: TeamPayload, session: AsyncSession):
     """insert render stat row
@@ -219,14 +232,10 @@ async def insert_team(payload: TeamPayload, session: AsyncSession):
         payload (BookPayload): payload from endpoint
         session (AsyncSession): SQLAlchemy scoped async session object
     """
-    session.add(
-        Team(
-            name=payload.name,
-            headquarters=payload.headquarters
-        )
-    )
+    session.add(Team(name=payload.name, headquarters=payload.headquarters))
     await session.commit()
     return
+
 
 async def insert_hero(payload: HeroPayload, team: str, session: AsyncSession):
     """insert render stat row
@@ -235,16 +244,10 @@ async def insert_hero(payload: HeroPayload, team: str, session: AsyncSession):
         payload (BookPayload): payload from endpoint
         session (AsyncSession): SQLAlchemy scoped async session object
     """
-    resp = await session.scalars(
-        select(Team).where(Team.name==team)
-    )
+    resp = await session.scalars(select(Team).where(Team.name == team))
     tt = resp.one_or_none()
     session.add(
-        Hero(
-            name=payload.name,
-            secret_name=payload.secret_name,
-            team_id=tt.tid
-        )
+        Hero(name=payload.name, secret_name=payload.secret_name, team_id=tt.tid)
     )
     await session.commit()
     return

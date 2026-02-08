@@ -28,10 +28,11 @@ class Book(BookPayload, table=True):
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
 
+
 class PaginationResponse(SQLModel):
     total: int
     rows: list
-    
+
 
 class BookFilter(SQLModel):
     title: Optional[str] = None
@@ -46,22 +47,24 @@ class TaskResponse(BaseModel):
     task_status: str
     task_result: str
 
+
 class TeamPayload(SQLModel):
     name: str = Field(index=True)
     headquarters: str
 
+
 class Team(TeamPayload, table=True):
-    tid: uuid.UUID = Field(
-        default_factory=uuid.uuid4, nullable=False, primary_key=True
-    )
+    tid: uuid.UUID = Field(default_factory=uuid.uuid4, nullable=False, primary_key=True)
     create_datetimestamp: datetime = Field(
         default_factory=gen_utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
 
+
 class HeroPayload(SQLModel):
     name: str = Field(index=True)
     secret_name: str
+
 
 class MutantClass(str, enum.Enum):
     """Mutant hero types"""
@@ -73,10 +76,9 @@ class MutantClass(str, enum.Enum):
     DELTA = "delta"
     EPSILON = "epsilon"
 
+
 class Hero(HeroPayload, table=True):
-    hid: uuid.UUID = Field(
-        default_factory=uuid.uuid4, nullable=False, primary_key=True
-    )
+    hid: uuid.UUID = Field(default_factory=uuid.uuid4, nullable=False, primary_key=True)
     team_id: uuid.UUID = Field(nullable=False, foreign_key="team.tid")
     create_datetimestamp: datetime = Field(
         default_factory=gen_utcnow,

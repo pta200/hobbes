@@ -18,7 +18,9 @@ teams_router = APIRouter(
 
 
 @teams_router.post("/team", status_code=201)
-async def add_team(payload: TeamPayload, session: AsyncSession = Depends(get_async_session)):
+async def add_team(
+    payload: TeamPayload, session: AsyncSession = Depends(get_async_session)
+):
     """add team
 
     Args:
@@ -31,8 +33,11 @@ async def add_team(payload: TeamPayload, session: AsyncSession = Depends(get_asy
 
     return await insert_team(payload, session)
 
+
 @teams_router.post("/hero/{team}", status_code=201)
-async def add_team(payload: HeroPayload, team: str, session: AsyncSession = Depends(get_async_session)):
+async def add_team(
+    payload: HeroPayload, team: str, session: AsyncSession = Depends(get_async_session)
+):
     """add hero
 
     Args:
