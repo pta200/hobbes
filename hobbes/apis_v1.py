@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Annotated
 from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from hobbes.iam import TokenData, validate_token
 from hobbes.crud import all_books, date_filter_books, filter_books, add_book
 from hobbes.db_manager import get_async_session

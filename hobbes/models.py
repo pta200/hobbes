@@ -61,11 +61,6 @@ class Team(TeamPayload, table=True):
     )
 
 
-class HeroPayload(SQLModel):
-    name: str = Field(index=True)
-    secret_name: str
-
-
 class MutantClass(str, enum.Enum):
     """Mutant hero types"""
 
@@ -75,6 +70,12 @@ class MutantClass(str, enum.Enum):
     GAMMA = "Gamma"
     DELTA = "delta"
     EPSILON = "epsilon"
+
+
+class HeroPayload(SQLModel):
+    name: str = Field(index=True)
+    secret_name: str
+    level: MutantClass
 
 
 class Hero(HeroPayload, table=True):

@@ -2,7 +2,6 @@ import asyncio
 import tempfile
 from asyncio import current_task
 from datetime import timedelta
-import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import (
@@ -14,7 +13,7 @@ from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.models import *
+from hobbes.models import * # noqa: F403
 from hobbes.main import app
 from hobbes.db_manager import get_async_session
 from hobbes.iam import create_access_token

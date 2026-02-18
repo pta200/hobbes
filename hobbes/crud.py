@@ -115,7 +115,7 @@ async def add_book(payload: BookPayload, session: AsyncSession):
 
     Args:
         payload (BookPayload): payload from endpoint
-        session (AsyncSession): SQLAlchemy scoped async session object
+        session (AsyncSession): SQLModel async scoped session object
     """
     book = Book(
         title=payload.title,
@@ -134,7 +134,7 @@ async def all_books(
     """query for all render stats in the table
 
     Args:
-        session (AsyncSession): SQLAlchemy scoped async session object
+        session (AsyncSession): SQLModel async scoped session object
 
     Returns:
         List[Book]: List of render stat objects
@@ -158,7 +158,7 @@ async def date_filter_books(date_param: datetime, compare: str, session: AsyncSe
     Args:
         date_param (datetime): Datetime object to filter by
         compare (str): comparisson string 'gt' or 'lt'
-        session (AsyncSession): SQLAlchemy scoped async session object
+        session (AsyncSession): SQLModel async scoped session object
 
     Returns:
         List[Book]: List of render stat objects
@@ -225,29 +225,55 @@ async def search_recent_team_member(session: AsyncSession):
     return resp
 
 
-async def insert_team(payload: TeamPayload, session: AsyncSession):
+async def insert_team(payload: TeamPayload, session: AsyncSession) -> Team:
     """insert render stat row
 
     Args:
-        payload (BookPayload): payload from endpoint
-        session (AsyncSession): SQLAlchemy scoped async session object
+        payload (TeamPayload): payload from endpoint
+        session (AsyncSession): SQLModel async scoped session object
     """
-    session.add(Team(name=payload.name, headquarters=payload.headquarters))
+    team = Team(name=payload.name, headquarters=payload.headquarters)
+    session.add(team)
     await session.commit()
-    return
+    return Team
 
 
-async def insert_hero(payload: HeroPayload, team: str, session: AsyncSession):
+async def insert_hero(payload: HeroPayload, team: str, session: AsyncSession) -> Hero:
     """insert render stat row
 
     Args:
-        payload (BookPayload): payload from endpoint
-        session (AsyncSession): SQLAlchemy scoped async session object
+        payload (HeroPayload): payload from endpoint
+        session (AsyncSession): SQLModel async scoped session object
     """
     resp = await session.scalars(select(Team).where(Team.name == team))
     tt = resp.one_or_none()
-    session.add(
-        Hero(name=payload.name, secret_name=payload.secret_name, team_id=tt.tid)
-    )
+    hero = Hero(name=payload.name, secret_name=payload.secret_name, team_id=tt.tid)
+    session.add(hero)
     await session.commit()
-    return
+    return hero
+
+
+async def insert_team_bundle(
+    team_payload: TeamPayload, hero_payload: HeroPayload, session: AsyncSession
+) -> tuple[Team, Hero]:
+    """Insert a new hero into a new team
+
+    Args:
+        team_payload (TeamPayload): payload from endpoint
+        hero_payload (HeroPayload):payload from endpoint
+        session (AsyncSession): SQLModel async scoped session object
+    """
+    # handle bundle as a transaction
+    team = Team(name=team_payload.name, headquarters=team_payload.headquarters)
+    session.add(team)
+    await session.flush()
+
+    hero = Hero(
+        name=hero_payload.name,
+        secret_name=hero_payload.secret_name,
+        team_id=team.tid,
+        level=hero_payload.level,
+    )
+    session.add(hero)
+    await session.commit()
+    return team, hero

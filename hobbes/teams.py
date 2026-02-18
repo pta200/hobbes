@@ -1,7 +1,5 @@
 import logging
-from datetime import datetime
-from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from hobbes.crud import insert_hero, insert_team, search_recent_team_member
 from hobbes.db_manager import get_async_session
 from hobbes.models import TeamPayload, HeroPayload
@@ -35,7 +33,7 @@ async def add_team(
 
 
 @teams_router.post("/hero/{team}", status_code=201)
-async def add_team(
+async def add_hero(
     payload: HeroPayload, team: str, session: AsyncSession = Depends(get_async_session)
 ):
     """add hero
@@ -52,7 +50,7 @@ async def add_team(
 
 
 @teams_router.post("/recent_heroes", status_code=201)
-async def add_team(session: AsyncSession = Depends(get_async_session)):
+async def search_heroes(session: AsyncSession = Depends(get_async_session)):
     """add hero
 
     Args:
