@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import datetime
 from typing import Annotated
 
@@ -6,7 +7,7 @@ from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.crud import add_book, all_books, date_filter_books, filter_books
+from hobbes.crud import add_book, all_books, date_filter_books, edit_book, filter_books
 from hobbes.db_manager import get_async_session
 from hobbes.iam import TokenData, validate_token
 from hobbes.models import (
@@ -81,6 +82,27 @@ async def insert_book(
     """
     logger.debug("payload is %s %s", payload, token.username)
     return await add_book(payload, session)
+
+
+@book_router.put("/{book_id}", status_code=status.HTTP_200_OK)
+async def udpate_book(
+    book_id: uuid.UUID,
+    payload: BookPayload,
+    token: Annotated[TokenData, Security(validate_token, scopes=["write"])],
+    session: AsyncSession = Depends(get_async_session),
+) -> Book:
+    """endpoint to insert a book. Hands it off to a background task so the API can return immediately
+
+    Args:
+        payload (BookPayload): book json payload
+        background_tasks (BackgroundTasks):
+        session (AsyncSession, optional): _description_. Defaults to Depends(get_async_session).
+
+    Returns:
+        json: status ok
+    """
+    logger.debug("payload is %s %s", payload, token.username)
+    return await edit_book(book_id, payload, session)
 
 
 @book_router.get("", operation_id="get_all")

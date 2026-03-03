@@ -1,5 +1,6 @@
 import logging
 import re
+import uuid
 from datetime import datetime
 
 from sqlalchemy import types
@@ -18,6 +19,12 @@ from hobbes.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class BookNotFoundException(Exception):
+    """Raised when a bank account has insufficient funds for a transaction."""
+
+    pass
 
 
 def set_val_type(column, val):
@@ -127,6 +134,36 @@ async def add_book(payload: BookPayload, session: AsyncSession):
     session.add(book)
     await session.commit()
     return book
+
+
+async def edit_book(book_id: uuid, payload: BookPayload, session: AsyncSession):
+    """update book by id
+
+    Args:
+        book_id (uuid): book uuid
+        payload (BookPayload): book payload
+        session (AsyncSession): SQLModel async scoped session object
+    """
+    result = await session.exec(select(Book).where(Book.book_id == book_id))
+
+    book = result.one_or_none()
+    if book:
+        if book.title != payload.title:
+            book.title = payload.title
+
+        if book.condition != payload.condition:
+            book.condition = payload.condition
+
+        if book.isbn != payload.isbn:
+            book.isbn = payload.isbn
+
+        session.add(book)
+        await session.commit()
+        await session.refresh(book)
+
+        return book
+    else:
+        raise BookNotFoundException(f"book id {book_id} not found")
 
 
 async def all_books(
