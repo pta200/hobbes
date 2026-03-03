@@ -2,19 +2,20 @@ import logging
 import re
 from datetime import datetime
 
+from sqlalchemy import types
+from sqlalchemy.orm import class_mapper
+from sqlmodel import and_, desc, func, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from hobbes.models import (
     Book,
     BookPayload,
     Hero,
-    Team,
-    TeamPayload,
     HeroPayload,
     PaginationResponse,
+    Team,
+    TeamPayload,
 )
-from sqlalchemy import types
-from sqlalchemy.orm import class_mapper
-from sqlmodel import and_, desc, select, func
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 logger = logging.getLogger(__name__)
 

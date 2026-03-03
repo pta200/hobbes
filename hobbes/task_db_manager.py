@@ -1,10 +1,11 @@
 import logging
 import os
 from contextlib import contextmanager
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from celery import current_task, Task
+
+from celery import Task, current_task
 from gevent import getcurrent as gevent_getcurrent
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 logger = logging.getLogger(__name__)
 

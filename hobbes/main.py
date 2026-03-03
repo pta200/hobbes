@@ -1,15 +1,16 @@
 import logging
 import os
-from pathlib import Path
 import tomllib
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from hobbes.apis_v1 import book_router
-from hobbes.teams import teams_router
 from hobbes.db_manager import async_session_manager
 from hobbes.iam import auth_router
+from hobbes.teams import teams_router
 
 logger = logging.getLogger(__name__)
 

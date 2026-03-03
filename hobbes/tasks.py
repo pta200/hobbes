@@ -1,10 +1,11 @@
-import os
 import logging
+import os
+
 import celery
 from sqlmodel import desc, select
-from hobbes.models import BookPayload
-from hobbes.task_db_manager import DBTaskCM, DBTaskCll
-from hobbes.models import Book
+
+from hobbes.models import Book, BookPayload
+from hobbes.task_db_manager import DBTaskCll, DBTaskCM
 
 logger = logging.getLogger(__name__)
 

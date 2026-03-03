@@ -2,13 +2,12 @@
 Authentication provider for Flower Dashboard which uses Tornado webserver
 """
 
-import os
 import logging
+import os
 
 import ldap3
-from ldap3 import Server, Connection, ALL
-
 from flower.views import BaseHandler
+from ldap3 import ALL, Connection, Server
 
 logger = logging.getLogger(__name__)
 

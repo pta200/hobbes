@@ -1,10 +1,11 @@
-import uuid
 import enum
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
+
 from pydantic import BaseModel
-from sqlmodel import Column, DateTime, Field, SQLModel, JSON, Enum
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import JSON, Column, DateTime, Enum, Field, SQLModel
 
 
 def gen_utcnow():

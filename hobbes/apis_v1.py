@@ -1,20 +1,22 @@
 import logging
 from datetime import datetime
 from typing import Annotated
+
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
-from hobbes.iam import TokenData, validate_token
-from hobbes.crud import all_books, date_filter_books, filter_books, add_book
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from hobbes.crud import add_book, all_books, date_filter_books, filter_books
 from hobbes.db_manager import get_async_session
+from hobbes.iam import TokenData, validate_token
 from hobbes.models import (
+    Book,
     BookFilter,
     BookPayload,
-    TaskResponse,
-    Book,
     PaginationResponse,
+    TaskResponse,
 )
-from sqlmodel.ext.asyncio.session import AsyncSession
-from hobbes.tasks import replay_task, archive_book, search_inventory_cll
+from hobbes.tasks import archive_book, replay_task, search_inventory_cll
 
 logger = logging.getLogger(__name__)
 

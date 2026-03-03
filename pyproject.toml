@@ -6,7 +6,7 @@ authors = [
     {name = "Paolo Audiberti",email = "pta200@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.9,<3.13"
+requires-python = "^3.11"
 dependencies = [
     "fastapi[all] (>=0.115.11,<0.116.0)",
     "sqlmodel (==0.0.25)",
@@ -31,9 +31,36 @@ build-backend = "poetry.core.masonry.api"
 aiosqlite = "^0.21.0"
 pytest-asyncio = "^0.25.3"
 pytest = "^8.3.5"
-ruff = "^0.9.9"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^26.1.0"
+bandit = "^1.9.4"
+pip-audit = "^2.10.0"
+isort = "^8.0.1"
+
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
 
 
+[tool.bandit]
+exclude_dirs = ["tests", "alembic", ".venv"]
+tests = ["B201", "B301"]
+skips = ["B101", "B601"]
+
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    # The following are specific to Black, you probably don't want those.
+    tests/data/
+    | profiling/
+)
+'''
+
+[tool.isort]
+profile = "black"
