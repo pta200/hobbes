@@ -42,6 +42,10 @@ isort = "^8.0.1"
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+]
 
 
 [tool.bandit]
