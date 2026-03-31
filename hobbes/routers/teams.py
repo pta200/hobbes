@@ -3,9 +3,9 @@ import logging
 from fastapi import APIRouter, Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.crud import insert_hero, insert_team, search_recent_team_member
-from hobbes.db_manager import get_async_session
-from hobbes.models import HeroPayload, TeamPayload
+from hobbes.services.crud import insert_hero, insert_team, search_recent_team_member
+from hobbes.db.db_manager import get_async_session
+from hobbes.models.models import HeroPayload, TeamPayload
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,7 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
-from hobbes.models import * # noqa: F403
+from hobbes.models.models import * # noqa: F403
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -7,17 +7,17 @@ from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.crud import add_book, all_books, date_filter_books, edit_book, filter_books
-from hobbes.db_manager import get_async_session
-from hobbes.iam import TokenData, validate_token
-from hobbes.models import (
+from hobbes.services.crud import add_book, all_books, date_filter_books, edit_book, filter_books
+from hobbes.db.db_manager import get_async_session
+from hobbes.routers.iam import TokenData, validate_token
+from hobbes.models.models import (
     Book,
     BookFilter,
     BookPayload,
     PaginationResponse,
     TaskResponse,
 )
-from hobbes.tasks import archive_book, replay_task, search_inventory_cll
+from hobbes.core.tasks import archive_book, replay_task, search_inventory_cll
 
 logger = logging.getLogger(__name__)
 

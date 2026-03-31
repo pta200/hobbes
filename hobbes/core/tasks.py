@@ -4,8 +4,8 @@ import os
 import celery
 from sqlmodel import desc, select
 
-from hobbes.models import Book, BookPayload
-from hobbes.task_db_manager import DBTaskCll, DBTaskCM
+from hobbes.models.models import Book, BookPayload
+from hobbes.db.task_db_manager import DBTaskCll, DBTaskCM
 
 logger = logging.getLogger(__name__)
 

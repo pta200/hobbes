@@ -26,7 +26,7 @@ class DatabaseSessionManager:
         return (current_task.request.id, gevent_getcurrent())
 
     def __init__(self):
-        if os.getenv("SYNC_DATABASE_URL"):
+        if SYNC_DATABASE_URL:
             self._engine = create_engine(
                 SYNC_DATABASE_URL,
                 echo=False,
