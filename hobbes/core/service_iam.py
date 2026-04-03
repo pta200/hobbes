@@ -22,7 +22,6 @@ ldap_urls = literal_eval(os.getenv("LDAP_URLS", "[]"))
 receive_timeout = int(os.getenv("LDAP_RECEIVE_TIMEOUT", "45"))
 time_limit = int(os.getenv("LDAP_TIME_LIMIT", "45"))
 connect_timeout = int(os.getenv("LDAP_CONNECT_TIMEOUT", "10"))
-# access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "180"))
 
 
 class LDAPAuthException(Exception):

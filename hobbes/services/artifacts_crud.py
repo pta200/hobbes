@@ -31,7 +31,9 @@ class IdNotFoundException(Exception):
     """Id not found"""
 
 
-async def add_repository(session: AsyncSession, payload: RepositoryCreatePayload, token: TokenData) -> Repositories:
+async def add_repository(
+    session: AsyncSession, payload: RepositoryCreatePayload, token: TokenData
+) -> Repositories:
     """
     Insert new repository
 
@@ -44,7 +46,9 @@ async def add_repository(session: AsyncSession, payload: RepositoryCreatePayload
         Repositories: returns repository object
     """
     # create new repository
-    rep = Repositories(rep_name=payload.rep_name, rep_type=payload.rep_type, url=payload.url)
+    rep = Repositories(
+        rep_name=payload.rep_name, rep_type=payload.rep_type, url=payload.url
+    )
     session.add(rep)
     await session.commit()
 
@@ -52,7 +56,10 @@ async def add_repository(session: AsyncSession, payload: RepositoryCreatePayload
 
 
 async def edit_repository(
-    session: AsyncSession, rep_id: uuid.UUID, payload: RepositoryEditPayload, token: TokenData
+    session: AsyncSession,
+    rep_id: uuid.UUID,
+    payload: RepositoryEditPayload,
+    token: TokenData,
 ) -> Repositories:
     """
     Edit existing repository
@@ -65,7 +72,9 @@ async def edit_repository(
     Returns:
         Repositories: edited repository
     """
-    result = await session.exec(select(Repositories).where(Repositories.rep_id == rep_id))
+    result = await session.exec(
+        select(Repositories).where(Repositories.rep_id == rep_id)
+    )
     rep = result.one_or_none()
     if rep:
         if rep.rep_name != payload.rep_name:
@@ -87,7 +96,9 @@ async def edit_repository(
         raise RepositoryNotFoundException(f"repository {payload.rep_name} not found")
 
 
-async def add_dependency(session: AsyncSession, payload: DependencyCreatePayload, token: TokenData) -> Dependencies:
+async def add_dependency(
+    session: AsyncSession, payload: DependencyCreatePayload, token: TokenData
+) -> Dependencies:
     """
     Add new dependency object
 
@@ -112,7 +123,10 @@ async def add_dependency(session: AsyncSession, payload: DependencyCreatePayload
 
 
 async def edit_dependency(
-    session: AsyncSession, dep_id: uuid.UUID, payload: DependencyEditPayload, token: TokenData
+    session: AsyncSession,
+    dep_id: uuid.UUID,
+    payload: DependencyEditPayload,
+    token: TokenData,
 ) -> Dependencies:
     """
     Edit existing dependency
@@ -125,7 +139,9 @@ async def edit_dependency(
     Returns:
         Dependencies: dependency object
     """
-    result = await session.exec(select(Dependencies).where(Dependencies.dep_id == dep_id))
+    result = await session.exec(
+        select(Dependencies).where(Dependencies.dep_id == dep_id)
+    )
     dep = result.one_or_none()
     if dep:
         if dep.dep_name != payload.dep_name:
@@ -151,7 +167,9 @@ async def edit_dependency(
     raise DependencyNotFoundException(f"dependency {payload.dep_name} not found")
 
 
-async def fetch_items(session: AsyncSession, model: Type[SQLModel], offset: int, limit: int) -> ArtifactPaginationResponse:
+async def fetch_items(
+    session: AsyncSession, model: Type[SQLModel], offset: int, limit: int
+) -> ArtifactPaginationResponse:
     """
     Fetch list of items based on model parameter.
 
@@ -167,9 +185,19 @@ async def fetch_items(session: AsyncSession, model: Type[SQLModel], offset: int,
     total = total_query.one()
 
     if model == Repositories:
-        result = await session.exec(select(Repositories).order_by(Repositories.rep_name).offset(offset).limit(limit))
+        result = await session.exec(
+            select(Repositories)
+            .order_by(Repositories.rep_name)
+            .offset(offset)
+            .limit(limit)
+        )
     else:
-        result = await session.exec(select(Dependencies).order_by(Dependencies.dep_name).offset(offset).limit(limit))
+        result = await session.exec(
+            select(Dependencies)
+            .order_by(Dependencies.dep_name)
+            .offset(offset)
+            .limit(limit)
+        )
 
     return ArtifactPaginationResponse(total=total, rows=list(result.all()))
 
@@ -195,7 +223,9 @@ async def fetch_by_id(session: AsyncSession, model: Type[SQLModel], obj_id: uuid
     raise IdNotFoundException(f"{model} id {obj_id} not found")
 
 
-async def delete_by_id(session: AsyncSession, model: Type[SQLModel], obj_id: uuid.UUID) -> bool:
+async def delete_by_id(
+    session: AsyncSession, model: Type[SQLModel], obj_id: uuid.UUID
+) -> bool:
     """
     Delete dependency
 

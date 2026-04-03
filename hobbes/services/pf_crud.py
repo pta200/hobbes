@@ -1,4 +1,3 @@
-
 import logging
 import uuid
 from typing import Type
@@ -29,7 +28,9 @@ class IdNotFoundException(Exception):
     """Id not found"""
 
 
-async def add_profile(session: AsyncSession, payload: ProfileCreatePayload, token: TokenData) -> ProfileResponse:
+async def add_profile(
+    session: AsyncSession, payload: ProfileCreatePayload, token: TokenData
+) -> ProfileResponse:
     """
     Insert all new profile or a new version for existing profile name
 
@@ -42,12 +43,18 @@ async def add_profile(session: AsyncSession, payload: ProfileCreatePayload, toke
         UUID: profile version uuid
     """
     # create new profile
-    pf = Profiles(prf_name=payload.prf_name, description=payload.description, username=token.username)
+    pf = Profiles(
+        prf_name=payload.prf_name,
+        description=payload.description,
+        username=token.username,
+    )
     session.add(pf)
     await session.flush()
 
     # create version
-    pf_version = ProfileVersions(ver_data=payload.data, prf_id=pf.prf_id, username=token.username)
+    pf_version = ProfileVersions(
+        ver_data=payload.data, prf_id=pf.prf_id, username=token.username
+    )
     session.add(pf_version)
     await session.commit()
 
@@ -63,7 +70,10 @@ async def add_profile(session: AsyncSession, payload: ProfileCreatePayload, toke
 
 
 async def add_profile_version(
-    session: AsyncSession, profile_name: str, payload: ProfileCreateVersionPayload, token: TokenData
+    session: AsyncSession,
+    profile_name: str,
+    payload: ProfileCreateVersionPayload,
+    token: TokenData,
 ) -> ProfileResponse:
     """
     Create new profile version
@@ -79,13 +89,17 @@ async def add_profile_version(
     Returns:
         UUID: profile version uuid
     """
-    result = await session.exec(select(Profiles).where(Profiles.prf_name == profile_name))
+    result = await session.exec(
+        select(Profiles).where(Profiles.prf_name == profile_name)
+    )
     pf = result.one_or_none()
     if not pf:
         raise ProfileNotFoundException(f"profile {profile_name} not found")
 
     # create version
-    pf_version = ProfileVersions(ver_data=payload.data, prf_id=pf.prf_id, username=token.username)
+    pf_version = ProfileVersions(
+        ver_data=payload.data, prf_id=pf.prf_id, username=token.username
+    )
     session.add(pf_version)
     await session.commit()
 
@@ -100,7 +114,9 @@ async def add_profile_version(
     )
 
 
-async def fetch_profiles(session: AsyncSession, offset: int, limit: int) -> ProfilesPaginationResponse:
+async def fetch_profiles(
+    session: AsyncSession, offset: int, limit: int
+) -> ProfilesPaginationResponse:
     """
     Get all profiles object using offset and limit. Does not include versions. This is for paginating.
 
@@ -116,7 +132,10 @@ async def fetch_profiles(session: AsyncSession, offset: int, limit: int) -> Prof
 
     if total > 0:
         result = await session.exec(
-            select(Profiles).order_by(Profiles.prf_name, desc(Profiles.create_dts)).offset(offset).limit(limit)
+            select(Profiles)
+            .order_by(Profiles.prf_name, desc(Profiles.create_dts))
+            .offset(offset)
+            .limit(limit)
         )
 
         rows = list(result.all())
@@ -145,7 +164,9 @@ async def fetch_profile_version(
     result = await session.scalars(
         select(ProfileVersions)
         .join(Profiles)
-        .where(Profiles.prf_name == profile_name, ProfileVersions.create_dts <= search_date)
+        .where(
+            Profiles.prf_name == profile_name, ProfileVersions.create_dts <= search_date
+        )
         .order_by(desc(ProfileVersions.create_dts))
         .limit(1)
     )
@@ -155,7 +176,9 @@ async def fetch_profile_version(
     raise ProfileNotFoundException(f"profile {profile_name} not found")
 
 
-async def fetch_profile_versions(session: AsyncSession, profile_name: str) -> list[ProfileVersions]:
+async def fetch_profile_versions(
+    session: AsyncSession, profile_name: str
+) -> list[ProfileVersions]:
     """
     Get all versions from a profile name
 
@@ -172,7 +195,12 @@ async def fetch_profile_versions(session: AsyncSession, profile_name: str) -> li
     result = await session.exec(
         select(ProfileVersions)
         .join(Profiles)
-        .where(and_(Profiles.prf_name == profile_name, ProfileVersions.prf_id == Profiles.prf_id))
+        .where(
+            and_(
+                Profiles.prf_name == profile_name,
+                ProfileVersions.prf_id == Profiles.prf_id,
+            )
+        )
     )
     rows = list(result.all())
     if len(rows) > 0:
@@ -228,7 +256,11 @@ async def find_profile(
     if len(rows) > 0:
         resp = []
         for prof, prof_version in rows:
-            resp.append(ProfilesSearchResponse(prf_name=prof.prf_name, prf_id=prof.prf_id, version=prof_version))
+            resp.append(
+                ProfilesSearchResponse(
+                    prf_name=prof.prf_name, prf_id=prof.prf_id, version=prof_version
+                )
+            )
         return resp
 
     raise ProfileNotFoundException(f"no profiles found")
@@ -246,7 +278,9 @@ async def remove_profile(session: AsyncSession, profile_id: uuid.UUID) -> bool:
         bool: delete success
     """
 
-    result = await session.exec(select(ProfileVersions).where(ProfileVersions.prf_id == profile_id))
+    result = await session.exec(
+        select(ProfileVersions).where(ProfileVersions.prf_id == profile_id)
+    )
     if result:
         for vers in result.all():
             logger.debug("delete profile version %s", vers.ver_id)
