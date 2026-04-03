@@ -7,7 +7,7 @@ from pydantic import AwareDatetime
 from sqlmodel import SQLModel, and_, desc, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.routers.iam import TokenData
+from hobbes.routers.auth import TokenData
 from hobbes.models.artifiacts_model import (
     ProfileCreatePayload,
     ProfileCreateVersionPayload,

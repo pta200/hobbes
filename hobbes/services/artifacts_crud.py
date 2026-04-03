@@ -5,8 +5,8 @@ from typing import Type
 from sqlmodel import SQLModel, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.routers.iam import TokenData
-from hobbes.models.artifiacts_model import (
+from hobbes.routers.auth import TokenData
+from hobbes.models.artifact_models import (
     Dependencies,
     DependencyCreatePayload,
     DependencyEditPayload,
@@ -151,7 +151,7 @@ async def edit_dependency(
     raise DependencyNotFoundException(f"dependency {payload.dep_name} not found")
 
 
-async def fetch_items(session: AsyncSession, model: Type[SQLModel], offset: int, limit: int) -> PaginationResponse:
+async def fetch_items(session: AsyncSession, model: Type[SQLModel], offset: int, limit: int) -> ArtifactPaginationResponse:
     """
     Fetch list of items based on model parameter.
 
@@ -161,7 +161,7 @@ async def fetch_items(session: AsyncSession, model: Type[SQLModel], offset: int,
         limit (int): row limit
 
     Returns:
-        DependenciesPagination: paginated model list of rows
+        ArtifactPaginationResponse: paginated model list of rows
     """
     total_query = await session.exec(select(func.count()).select_from(model))
     total = total_query.one()
@@ -171,7 +171,7 @@ async def fetch_items(session: AsyncSession, model: Type[SQLModel], offset: int,
     else:
         result = await session.exec(select(Dependencies).order_by(Dependencies.dep_name).offset(offset).limit(limit))
 
-    return PaginationResponse(total=total, rows=list(result.all()))
+    return ArtifactPaginationResponse(total=total, rows=list(result.all()))
 
 
 async def fetch_by_id(session: AsyncSession, model: Type[SQLModel], obj_id: uuid.UUID):

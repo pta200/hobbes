@@ -9,8 +9,8 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from hobbes.services.crud import add_book, all_books, date_filter_books, edit_book, filter_books
 from hobbes.db.db_manager import get_async_session
-from hobbes.routers.iam import TokenData, validate_token
-from hobbes.models.models import (
+from hobbes.core.service_iam import TokenData, validate_token
+from hobbes.models.book_models import (
     Book,
     BookFilter,
     BookPayload,

@@ -8,7 +8,7 @@ from sqlalchemy.orm import class_mapper
 from sqlmodel import and_, desc, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.models.models import (
+from hobbes.models.book_models import (
     Book,
     BookPayload,
     Hero,

@@ -6,12 +6,8 @@ from typing import Annotated
 
 import jwt
 import ldap3
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import (
-    OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm,
-    SecurityScopes,
-)
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jwt.exceptions import InvalidTokenError
 from ldap3.core.exceptions import LDAPException
 from pydantic import BaseModel
@@ -26,7 +22,7 @@ ldap_urls = literal_eval(os.getenv("LDAP_URLS", "[]"))
 receive_timeout = int(os.getenv("LDAP_RECEIVE_TIMEOUT", "45"))
 time_limit = int(os.getenv("LDAP_TIME_LIMIT", "45"))
 connect_timeout = int(os.getenv("LDAP_CONNECT_TIMEOUT", "10"))
-access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "180"))
+# access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "180"))
 
 
 class LDAPAuthException(Exception):
@@ -164,40 +160,3 @@ async def create_access_token(data: dict, expires_delta: timedelta) -> str:
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, jwt_key, algorithm="HS256")
     return encoded_jwt
-
-
-# Auth API router
-auth_router = APIRouter(
-    prefix="/auth",
-    tags=["Authentication"],
-    responses={404: {"description": "Not found"}},
-)
-
-
-@auth_router.post("/token", operation_id="authenticate")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-    """
-    Login API in form data (not JSON) format
-
-    Args:
-        form_data (Annotated[OAuth2PasswordRequestForm, Depends): Oauth form data
-
-    Raises:
-        HTTPException: failure to authenticate
-
-    Returns:
-        Token: JWT token
-    """
-    auth_scopes = LDAPAuth.authenticate(form_data.username, form_data.password)
-    if not auth_scopes:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=access_token_expire_minutes)
-    access_token = await create_access_token(
-        data={"sub": form_data.username, "scope": auth_scopes},
-        expires_delta=access_token_expires,
-    )
-    return Token(access_token=access_token, token_type="bearer")

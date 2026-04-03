@@ -13,10 +13,10 @@ from sqlalchemy.pool import NullPool
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from hobbes.models.models import * # noqa: F403
+from hobbes.models.book_models import * # noqa: F403
 from hobbes.main import app
 from hobbes.db.db_manager import get_async_session
-from hobbes.routers.iam import create_access_token
+from hobbes.core.service_iam import create_access_token
 
 tmp_dir = tempfile.TemporaryDirectory()
 

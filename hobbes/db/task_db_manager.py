@@ -14,10 +14,13 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
 DB_HOST = os.environ.get("DB_HOST", "")
 DB_PORT = os.environ.get("DB_PORT", "")
 DB_NAME = os.environ.get("DB_NAME", "")
-SYNC_DATABASE_URL = (
-    f"postgresql+psycopg://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
 
+if DB_HOST:
+    SYNC_DATABASE_URL = (
+        f"postgresql+psycopg://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+else:
+    SYNC_DATABASE_URL = None
 
 class DatabaseSessionManager:
     """Sync database engine and session managment class for use in Celery workers"""

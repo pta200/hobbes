@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from hobbes.routers.apis_v1 import book_router
 from hobbes.db.db_manager import async_session_manager
-from hobbes.routers.iam import auth_router
+from hobbes.routers.auth import auth_router
 from hobbes.routers.teams import teams_router
 
 logger = logging.getLogger(__name__)
